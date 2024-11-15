@@ -10,6 +10,7 @@ internal class Program
         // Add services to the container.
         builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("InMem"));
         builder.Services.AddScoped<IAbonentRepo, AbonentRepo>();
+        builder.Services.AddScoped<IRemainRepo, RemainRepo>();
         builder.Services.AddControllers().AddNewtonsoftJson();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

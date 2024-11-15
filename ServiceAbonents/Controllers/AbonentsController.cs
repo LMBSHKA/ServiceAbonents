@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Azure;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using ServiceAbonents.Data;
@@ -13,10 +12,12 @@ namespace ServiceAbonents.Controllers
     public class AbonentsController : ControllerBase
     {
         private readonly IAbonentRepo _repository;
+        private readonly IRemainRepo _remainRepository;
         private readonly IMapper _mapper;
 
-        public AbonentsController(IAbonentRepo repository, IMapper mapper)
+        public AbonentsController(IAbonentRepo repository, IMapper mapper, IRemainRepo remainRepo)
         {
+            _remainRepository = remainRepo;
             _repository = repository;
             _mapper = mapper;
         }
@@ -46,8 +47,16 @@ namespace ServiceAbonents.Controllers
             _repository.CreateAbonent(abonentModel);
             _repository.SaveChange();
             var abonentReadDto = _mapper.Map<AbonentReadDto>(abonentModel);
-            return CreatedAtRoute(nameof(GetAbonentById), new { Id = abonentReadDto.Id }, abonentReadDto);
+            //Для возврата json файла с параметрами созданного объекта
+            //var res = CreatedAtRoute(nameof(GetAbonentById), new { Id = abonentReadDto.Id }, abonentReadDto);
+            var remain = new Remain { ClientId = abonentReadDto.Id, ReaminGb = 0, RemainMin = 0, RemainSMS = 0 };
+            _remainRepository.CreateRemain(remain);
+            _remainRepository.SaveChanges();
+            return Ok();
         }
+
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //Автоматизировать запрос PATCH для отправки json файла с полями которые надо заменить условно phone: 79937453675
 
         [HttpPatch]
         [Route("{id::int}/Update")]
@@ -55,9 +64,7 @@ namespace ServiceAbonents.Controllers
         {
             if (patchDoc == null)
                 return BadRequest();
-
             var abonent = _repository.GetAbonentById(id);
-            
             //patchDoc.Replace(e => e.Name, "NameUp");
             patchDoc.ApplyTo(abonent, ModelState);
 
@@ -65,7 +72,6 @@ namespace ServiceAbonents.Controllers
             {
                 return BadRequest(ModelState);
             }
-
             _repository.Update(abonent);
             _repository.SaveChange();
             return Ok();//Ok(_mapper.Map<Abonent>(abonent));

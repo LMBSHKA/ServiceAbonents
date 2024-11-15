@@ -8,8 +8,10 @@ namespace ServiceAbonents.Data
     public class AbonentRepo : IAbonentRepo
     {
         private readonly AppDbContext _context;
+        //private readonly IRemainRepo _remainRepo;
         public AbonentRepo(AppDbContext context)
         {
+            //_remainRepo = remainRepo;
             _context = context;
         }
 
@@ -17,6 +19,7 @@ namespace ServiceAbonents.Data
         {
             if (abonent == null)
                 throw new ArgumentNullException(nameof(abonent));
+            //_remainRepo.CreateRemain(abonent.Id);
             _context.Abonents.Add(abonent);
         }
 
@@ -43,7 +46,6 @@ namespace ServiceAbonents.Data
                 throw new ArgumentNullException(nameof(updateAbonent.Id));
             _context.Update(updateAbonent);
             _context.SaveChanges();
-            
         } 
 
         public bool SaveChange()
