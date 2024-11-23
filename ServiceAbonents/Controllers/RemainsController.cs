@@ -1,13 +1,12 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.JsonPatch;
+//using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using ServiceAbonents.Data;
 using ServiceAbonents.Dtos;
-using ServiceAbonents.Models;
 
 namespace ServiceAbonents.Controllers
 {
-	[Route("apishka/{controller}")]
+	[Route("v1/Remains/")]
 	[ApiController]
 	public class RemainsController : ControllerBase
 	{
@@ -26,17 +25,7 @@ namespace ServiceAbonents.Controllers
 			var remainItem = _repository.GetAllRemains();
 			return Ok(_mapper.Map<IEnumerable<RemainReadDto>>(remainItem));
 		}
-
-		//[HttpPost]
-		//public ActionResult<RemainCreateDto> CreateRemain(RemainCreateDto newRemain)
-		//{
-		//	var remainModel = _mapper.Map<Remain>(newRemain);
-		//	_repository.CreateRemain(remainModel);
-		//	_repository.SaveChanges();
-		//	var remainReadDto = _mapper.Map<RemainReadDto>(remainModel);
-		//	return CreatedAtRoute(nameof(GetRemainByAbonentId), new { CleintId = remainReadDto.ClientId }, remainReadDto);//nameof(GetRemainById), new { Id = remainReadDto.Id }, remainReadDto);
-		//}
-
+		
 		[HttpGet("{id}")]
 		public ActionResult<RemainReadDto> GetRemainByAbonentId(int id)
 		{
@@ -46,26 +35,45 @@ namespace ServiceAbonents.Controllers
             return NotFound();
 		}
 
-		[HttpPatch]
-        [Route("{clientId::int}/Update")]
-		public ActionResult Update (int clientId, [FromBody] JsonPatchDocument<Remain> patchDoc)
+		[HttpPut]
+		public ActionResult UpdatePut (int clientId, RemainUpdateDto updateRemain)
 		{
-			if (patchDoc == null)
-				return BadRequest();
-
 			var remain = _repository.GetRemainByAbonentId(clientId);
 
-			patchDoc.ApplyTo(remain, ModelState);
+			if (updateRemain.RemainGb != 0)
+				remain.ReaminGb = updateRemain.RemainGb;
 
-			if (!ModelState.IsValid)
-			{
-				return BadRequest(ModelState);
-			}
+			if (updateRemain.RemainMin != 0)
+				remain.RemainMin = updateRemain.RemainMin;
+
+			if (updateRemain.RemainSMS != 0)
+				remain.RemainSMS = updateRemain.RemainSMS;
 
 			_repository.Update(remain);
-			_repository.SaveChanges();
-
 			return Ok();
 		}
+
+		//Для наших задач больше подходит put
+		//[HttpPatch]
+  //      [Route("{clientId::int}/Update")]
+		//public ActionResult Update (int clientId, [FromBody] JsonPatchDocument<Remain> patchDoc)
+		//{
+		//	if (patchDoc == null)
+		//		return BadRequest();
+
+		//	var remain = _repository.GetRemainByAbonentId(clientId);
+
+		//	patchDoc.ApplyTo(remain, ModelState);
+
+		//	if (!ModelState.IsValid)
+		//	{
+		//		return BadRequest(ModelState);
+		//	}
+
+		//	_repository.Update(remain);
+		//	_repository.SaveChanges();
+
+		//	return Ok();
+		//}
     }
 }
