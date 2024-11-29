@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ServiceAbonents.Data;
@@ -55,7 +56,6 @@ internal class Program
         builder.Services.AddSwaggerGen();
 
         var app = builder.Build();
-
         
         //Генерация токена при авторизации пользоваетеля в этом примере генерица токен по имени пользователя
         //токен должен генерится в сервисе авторизации я его должен принимать через запрос от клиента
@@ -81,7 +81,7 @@ internal class Program
 
         //PrepDb.PrepPopulation(app);
 
-        app.UseHttpsRedirection();
+        //app.UseHttpsRedirection();
 
         app.UseAuthorization();
 

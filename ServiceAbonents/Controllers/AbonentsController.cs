@@ -45,7 +45,7 @@ namespace ServiceAbonents.Controllers
             var abonentItem = _repository.GetAbonentById(id);
             if (abonentItem != null)
                 return Ok(_mapper.Map<AbonentReadDto>(abonentItem));
-            return NotFound();
+            return BadRequest("User not found");
         }
 
         [HttpPost]

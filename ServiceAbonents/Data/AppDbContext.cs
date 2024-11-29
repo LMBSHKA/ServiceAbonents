@@ -8,6 +8,9 @@ namespace ServiceAbonents.Data
         public DbSet<Abonent> Abonents { get; set; }
         public DbSet<Remain> Remains { get; set; }
 
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
+        { 
+            Database.EnsureCreated();
+        }
     }
 }
