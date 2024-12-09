@@ -1,14 +1,12 @@
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ServiceAbonents.Data;
+using ServiceAbonents.RabbitMq;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Mime;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Claims;
-using System.Text;
+
 
 internal class Program
 {
@@ -45,7 +43,11 @@ internal class Program
             opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
         });
 
+        
         // Add services to the container.
+        builder.Services.AddHostedService<RabbitMqListener>();
+
+        //builder.Services.AddScoped<IUpdateBalance, UpdateBalance>();
         builder.Services.AddScoped<IAbonentRepo, AbonentRepo>();
         builder.Services.AddScoped<IRemainRepo, RemainRepo>();
         builder.Services.AddControllers().AddNewtonsoftJson();
@@ -78,9 +80,9 @@ internal class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-
+        
         //PrepDb.PrepPopulation(app);
-
+        
         //app.UseHttpsRedirection();
 
         app.UseAuthorization();
@@ -88,6 +90,7 @@ internal class Program
         app.MapControllers();
 
         app.Run();
+        
     }
 }
 

@@ -11,6 +11,8 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
 
+using RabbitMQ;
+
 namespace ServiceAbonents.Controllers
 {
     //параметр который не дает доступ без авторизации то есть без jwt токена
