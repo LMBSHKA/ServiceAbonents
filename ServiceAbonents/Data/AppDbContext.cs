@@ -9,7 +9,7 @@ namespace ServiceAbonents.Data
         public DbSet<Remain> Remains { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
-        { 
+        {
             Database.EnsureCreated();
         }
     }

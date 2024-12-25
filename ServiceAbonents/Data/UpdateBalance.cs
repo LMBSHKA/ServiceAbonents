@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using ServiceAbonents.Dtos;
+using ServiceAbonents.RabbitMq;
 
 namespace ServiceAbonents.Data
 {
@@ -10,6 +11,8 @@ namespace ServiceAbonents.Data
 
         public static bool TopUpAndDebitingBalance(TopUpDto newBalance)
         {
+            var newAbonent = Debiting.Debiting.FindAbonents(newBalance.ClientId);
+
             using var con = new NpgsqlConnection(connectionString);
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseNpgsql(con)
@@ -21,9 +24,14 @@ namespace ServiceAbonents.Data
                 try
                 {
                     var abonent = context.Abonents.FirstOrDefault(x => x.Id == newBalance.ClientId);
+
                     abonent.Balance = abonent.Balance + newBalance.Amount;
                     context.SaveChanges();
                     transaction.Commit();
+
+                    if (newAbonent != null)
+                        Debiting.Debiting.Update(abonent);
+
                     return true;
                 }
 

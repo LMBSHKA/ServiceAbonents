@@ -2,10 +2,14 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using ServiceAbonents.Data;
+using ServiceAbonents.Debiting;
+using ServiceAbonents.Models;
 using ServiceAbonents.RabbitMq;
 using System.IdentityModel.Tokens.Jwt;
+using Volo.Abp.Data;
 
 
 internal class Program
@@ -14,40 +18,19 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        //настройки дл€ токена
-        //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        //    .AddJwtBearer(options =>
-        //    {
-        //        options.TokenValidationParameters = new TokenValidationParameters
-        //        {
-        //            // указывает, будет ли валидироватьс€ издатель при валидации токена
-        //            ValidateIssuer = true,
-        //            // строка, представл€юща€ издател€
-        //            ValidIssuer = AuthOptions.ISSUER,
-        //            // будет ли валидироватьс€ потребитель токена
-        //            ValidateAudience = true,
-        //            // установка потребител€ токена
-        //            ValidAudience = AuthOptions.AUDIENCE,
-        //            // будет ли валидироватьс€ врем€ существовани€
-        //            ValidateLifetime = true,
-        //            // установка ключа безопасности
-        //            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-        //            // валидаци€ ключа безопасности
-        //            ValidateIssuerSigningKey = true,
-        //        };
-        //    });
-
         //Connect Db
         builder.Services.AddDbContext<AppDbContext>(opt =>
         {
             opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
         });
 
-        
+        //очистка Ѕƒ
+        var cleaner = new DatabaseCleaner(builder.Configuration.GetConnectionString("DefaultConnection"));
+        cleaner.ClearDatabase();
+
         // Add services to the container.
         builder.Services.AddHostedService<RabbitMqListener>();
 
-        //builder.Services.AddScoped<IUpdateBalance, UpdateBalance>();
         builder.Services.AddScoped<IAbonentRepo, AbonentRepo>();
         builder.Services.AddScoped<IRemainRepo, RemainRepo>();
         builder.Services.AddControllers().AddNewtonsoftJson();
@@ -58,21 +41,6 @@ internal class Program
         builder.Services.AddSwaggerGen();
 
         var app = builder.Build();
-        
-        //√енераци€ токена при авторизации пользоваетел€ в этом примере генерица токен по имени пользовател€
-        //токен должен генеритс€ в сервисе авторизации € его должен принимать через запрос от клиента
-        //app.Map("/login/{username}", (string username) =>
-        //{
-        //    var claims = new List<Claim> { new Claim(ClaimTypes.Name, username) };
-        //    var jwt = new JwtSecurityToken(
-        //            issuer: AuthOptions.ISSUER,
-        //            audience: AuthOptions.AUDIENCE,
-        //            claims: claims,
-        //            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(2)), // врем€ действи€ 2 минуты
-        //            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-
-        //    return new JwtSecurityTokenHandler().WriteToken(jwt);
-        //});
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -94,12 +62,23 @@ internal class Program
     }
 }
 
-//ключ дл€ шифровки токена и дешифровки
-//public class AuthOptions
-//{
-//    public const string ISSUER = "MyAuthServer";
-//    public const string AUDIENCE = "MyAuthClient";
-//    const string KEY = "mysupersecret_secretsecretsecretkey!123";
-//    public static SymmetricSecurityKey GetSymmetricSecurityKey() =>
-//        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(KEY));
-//}
+public class DatabaseCleaner
+{
+    private readonly string _connectionString;
+
+    public DatabaseCleaner(string connectionString)
+    {
+        _connectionString = connectionString;
+    }
+    public void ClearDatabase()
+    {
+        var serviceProvider = new ServiceCollection()
+           .AddDbContext<AppDbContext>(options => options.UseNpgsql(_connectionString))
+           .BuildServiceProvider();
+
+        using var context = serviceProvider.GetRequiredService<AppDbContext>();
+
+        // ”дал€ем существующую базу данных (если есть)
+        context.Database.EnsureDeleted();
+    }
+}

@@ -4,6 +4,6 @@ namespace ServiceAbonents.Data
 {
     public interface IUpdateBalance
     {
-        public bool TopUpBalance(TopUpDto newBalance);
+        public bool TopUpAndDebitingBalance(TopUpDto newBalance);
     }
 }

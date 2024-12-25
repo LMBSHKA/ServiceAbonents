@@ -12,6 +12,6 @@ namespace ServiceAbonents.Data
         Abonent GetAbonentById(int id);
         void CreateAbonent(Abonent abonent);
         int GetTariffIdByAbonentId(int id);
-        void Update(Abonent updateAbonent);
+        void Update(int id, AbonentsUpdateDto updateAbonent);
     }
 }

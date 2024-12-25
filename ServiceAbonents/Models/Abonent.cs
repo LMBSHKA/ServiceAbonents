@@ -22,5 +22,7 @@ namespace ServiceAbonents.Models
         public string PasportData { get; set; }
         [Required]
         public decimal Balance { get; set; }
+        //[Required]
+        //public string DateForDeduct { get; set; }
     }
 }

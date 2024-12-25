@@ -45,8 +45,10 @@ namespace ServiceAbonents.Controllers
         {
             Console.WriteLine("Get abonent by id");
             var abonentItem = _repository.GetAbonentById(id);
+
             if (abonentItem != null)
                 return Ok(_mapper.Map<AbonentReadDto>(abonentItem));
+
             return BadRequest("User not found");
         }
 
@@ -68,52 +70,8 @@ namespace ServiceAbonents.Controllers
         [HttpPut]
         public ActionResult UpdatePut(int id, AbonentsUpdateDto updateAbonent)
         {
-            var abonent = _repository.GetAbonentById(id);
-
-            if (updateAbonent.TarrifId != 0)
-                abonent.TarrifId = updateAbonent.TarrifId;
-
-            if (updateAbonent.Name != string.Empty)
-                abonent.Name = updateAbonent.Name;
-
-            if (updateAbonent.Surname != string.Empty)
-                abonent.Surname = updateAbonent.Surname;
-
-            if (updateAbonent.Patronymic != string.Empty)
-                abonent.Patronymic = updateAbonent.Patronymic;
-
-            if (updateAbonent.PhoneNumber != string.Empty)
-                abonent.PhoneNumber = updateAbonent.PhoneNumber;
-
-            if (updateAbonent.PasportData != string.Empty)
-                abonent.PasportData = updateAbonent.PasportData;
-
-            if (updateAbonent.Balance != 0)
-                abonent.Balance = updateAbonent.Balance;
-
-            _repository.Update(abonent);
+            _repository.Update(id, updateAbonent);
             return Ok();
         }
-
-        //Убрали этот запрос потому что put удобнее для наших задач
-
-        //[HttpPatch]
-        //[Route("{id::int}/Update")]
-        //public ActionResult Update(int id, [FromBody] JsonPatchDocument<Abonent> patchDoc)
-        //{
-        //    if (patchDoc == null)
-        //        return BadRequest();
-        //    var abonent = _repository.GetAbonentById(id);
-        //    //patchDoc.Replace(e => e.Name, "NameUp");
-        //    patchDoc.ApplyTo(abonent, ModelState);
-
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-        //    _repository.Update(abonent);
-        //    _repository.SaveChange();
-        //    return Ok();//Ok(_mapper.Map<Abonent>(abonent));
-        //}
     }
 }
