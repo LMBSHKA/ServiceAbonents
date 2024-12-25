@@ -1,18 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using ServiceAbonents.Debiting;
 using ServiceAbonents.Dtos;
 using ServiceAbonents.RabbitMq;
 
 namespace ServiceAbonents.Data
 {
-    public class UpdateBalance
+    public class UpdateBalance : IUpdateBalance
     {
         private static readonly string connectionString = "Server=localhost;Port=5432;Database=ServiceAbonents_AT;User Id=postgres;Password=admin";
+        //private readonly IDebiting _debiting;
 
-        public static bool TopUpAndDebitingBalance(TopUpDto newBalance)
+        //public UpdateBalance(IDebiting debiting)
+        //{
+        //    _debiting = debiting;
+        //}
+
+        public bool TopUpAndDebitingBalance(TopUpDto newBalance)
         {
-            var newAbonent = Debiting.Debiting.FindAbonents(newBalance.ClientId);
-
             using var con = new NpgsqlConnection(connectionString);
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseNpgsql(con)
@@ -28,9 +33,6 @@ namespace ServiceAbonents.Data
                     abonent.Balance = abonent.Balance + newBalance.Amount;
                     context.SaveChanges();
                     transaction.Commit();
-
-                    if (newAbonent != null)
-                        Debiting.Debiting.Update(abonent);
 
                     return true;
                 }

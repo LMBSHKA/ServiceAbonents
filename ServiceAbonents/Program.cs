@@ -31,6 +31,9 @@ internal class Program
         // Add services to the container.
         builder.Services.AddHostedService<RabbitMqListener>();
 
+        builder.Services.AddScoped<ISender, RabbitMqSender>();
+        builder.Services.AddScoped<IDebiting, Debiting>();
+        builder.Services.AddScoped<IUpdateBalance, UpdateBalance>();
         builder.Services.AddScoped<IAbonentRepo, AbonentRepo>();
         builder.Services.AddScoped<IRemainRepo, RemainRepo>();
         builder.Services.AddControllers().AddNewtonsoftJson();

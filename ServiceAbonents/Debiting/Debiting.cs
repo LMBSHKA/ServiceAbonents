@@ -2,33 +2,37 @@
 using ServiceAbonents.Dtos;
 using ServiceAbonents.Models;
 using ServiceAbonents.RabbitMq;
+using System.Reflection.Metadata.Ecma335;
 
 namespace ServiceAbonents.Debiting
 {
-    public class Debiting
+    public class Debiting : IDebiting
     {
         private static List<Abonent> newAbonents = new List<Abonent>();
-        public static Abonent FindAbonents(int id)
+        private readonly IUpdateBalance _updateBalance;
+        private readonly ISender _send;
+
+        public Debiting(ISender send, IUpdateBalance updateBalance)
         {
-            var abonent = newAbonents.FirstOrDefault(x => x.Id == id);
-            return abonent;
+            _updateBalance = updateBalance;
+            _send = send;
         }
 
-        public static void AddNewAbonent(Abonent abonent) => newAbonents.Add(abonent);
+        public Abonent FindAbonents(int id) => newAbonents.FirstOrDefault(x => x.Id == id);
+
+        public void AddNewAbonent(Abonent abonent) => newAbonents.Add(abonent);
         
-        public static void RemoveAbonent(Abonent abonent)
-        {
-            newAbonents.Remove(abonent);
-        }
+        public void RemoveAbonent(Abonent abonent) => newAbonents.Remove(abonent);
+        
 
-        public static void Update(Abonent abonent)
+        public void Update(Abonent abonent)
         {
             var newAbonent = FindAbonents(abonent.Id);
             RemoveAbonent(newAbonent);
             AddNewAbonent(abonent);
         }
 
-        public static bool ExamTransaction(TopUpDto newBalance)
+        public bool ExamTransaction(TopUpDto newBalance)
         {
 
             var tariffCost = 500;
@@ -37,9 +41,8 @@ namespace ServiceAbonents.Debiting
             if (newAbonent != null && newAbonent.Balance > 0 && newAbonent.Balance + newBalance.Amount - tariffCost >= 0)
             {
                 RemoveAbonent(newAbonent);
-                RabbitMqSender.SendMessage(SetTransaction(newBalance.ClientId, tariffCost));
-
-                return UpdateBalance.TopUpAndDebitingBalance(new TopUpDto
+                _send.SendMessage(SetTransaction(newBalance.ClientId, tariffCost));
+                return _updateBalance.TopUpAndDebitingBalance(new TopUpDto
                 {
                     ClientId = newBalance.ClientId,
                     Amount = newBalance.Amount - tariffCost
@@ -48,15 +51,21 @@ namespace ServiceAbonents.Debiting
 
             if (newBalance.Amount < 0 || (newAbonent != null && newBalance.Amount < tariffCost) || newAbonent == null)
             {
-                return UpdateBalance.TopUpAndDebitingBalance(newBalance);
+                var result = _updateBalance.TopUpAndDebitingBalance(newBalance);
+                if (result == true && newAbonent != null)
+                {
+                    newAbonent.Balance += newBalance.Amount;
+                    Update(newAbonent);
+                }
+                return result;
             }
 
-            RabbitMqSender.SendMessage(SetTransaction(newBalance.ClientId, newBalance.Amount));
+            _send.SendMessage(SetTransaction(newBalance.ClientId, newBalance.Amount));
             RemoveAbonent(newAbonent);
             return true;
         }
 
-        public static TransactionDto SetTransaction(int id, decimal amount)
+        private TransactionDto SetTransaction(int id, decimal amount)
         {
             return new TransactionDto
             {

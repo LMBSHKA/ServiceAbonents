@@ -7,7 +7,7 @@ namespace ServiceAbonents.RabbitMq
 {
     public class RabbitMqSender : ISender
     {
-        private static readonly Uri _uri = new Uri("amqps://akmeanzg:TMOCQxQAEWZjfE0Y7wH5v0TN_XTQ9Xfv@mouse.rmq5.cloudamqp.com/akmeanzg");
+        private readonly Uri _uri = new Uri("amqps://akmeanzg:TMOCQxQAEWZjfE0Y7wH5v0TN_XTQ9Xfv@mouse.rmq5.cloudamqp.com/akmeanzg");
 
         public void SendMessage(object obj)
         {
@@ -15,7 +15,7 @@ namespace ServiceAbonents.RabbitMq
             SendMessage(message);
         }
 
-        public static async Task<bool> SendMessage(TransactionDto transaction)
+        public async Task<bool> SendMessage(TransactionDto transaction)
         {
             var factory = new ConnectionFactory() { Uri = _uri };
             using var connection = await factory.CreateConnectionAsync();

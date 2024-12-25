@@ -1,6 +1,7 @@
-﻿using RabbitMQ.Client;
+﻿using AutoMapper.Execution;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using ServiceAbonents.Data;
+using ServiceAbonents.Debiting;
 using ServiceAbonents.Dtos;
 using System.Diagnostics;
 using System.Text;
@@ -12,8 +13,13 @@ namespace ServiceAbonents.RabbitMq
     public class RabbitMqListener : BackgroundService
     {
         private static readonly Uri _uri = new Uri("amqps://akmeanzg:TMOCQxQAEWZjfE0Y7wH5v0TN_XTQ9Xfv@mouse.rmq5.cloudamqp.com/akmeanzg");
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        
+        public RabbitMqListener(IServiceScopeFactory scopeFactory)
+        {
+            _scopeFactory = scopeFactory;
+        }
+
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             stoppingToken.ThrowIfCancellationRequested();
@@ -32,26 +38,27 @@ namespace ServiceAbonents.RabbitMq
             var consumer = new AsyncEventingBasicConsumer(channel);
             consumer.ReceivedAsync +=  (model, ea) =>
             {
-                var body = ea.Body.ToArray();
-                var type = Encoding.UTF8.GetString((byte[])ea.BasicProperties.Headers["type"]);
-                if (type == "Oper")
-                    Console.WriteLine("Oper------------------------------------------");
-                var amount = JsonSerializer.Deserialize<TopUpDto>(Encoding.UTF8.GetString(body));
-                
-                Console.WriteLine($"[X] Recieved {amount}");
-                Debug.WriteLine($"Recieved {amount}");
-                res = Debiting.Debiting.ExamTransaction(amount);
-
-                if (res == false || amount == null)
+                using (var scope = _scopeFactory.CreateAsyncScope())
                 {
-                    Console.WriteLine("Error in processing");
-                    channel.BasicNackAsync(ea.DeliveryTag, false, false);
-                    
+                    var debiting = scope.ServiceProvider.GetRequiredService<IDebiting>();
+                    var body = ea.Body.ToArray();
+                    var amount = JsonSerializer.Deserialize<TopUpDto>(Encoding.UTF8.GetString(body));
+
+                    Console.WriteLine($"[X] Recieved {amount}");
+                    Debug.WriteLine($"Recieved {amount}");
+                    res = debiting.ExamTransaction(amount);
+
+                    if (res == false || amount == null)
+                    {
+                        Console.WriteLine("Error in processing");
+                        channel.BasicNackAsync(ea.DeliveryTag, false, false);
+
+                    }
+                    else
+                        channel.BasicAckAsync(ea.DeliveryTag, false);
+
+                    return Task.CompletedTask;
                 }
-                else
-                    channel.BasicAckAsync(ea.DeliveryTag, false);
-                
-                return Task.CompletedTask;
             };
             await channel.BasicConsumeAsync(queueName, autoAck: false, consumer: consumer);
 

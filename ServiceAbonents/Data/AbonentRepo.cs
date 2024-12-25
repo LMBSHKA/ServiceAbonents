@@ -9,11 +9,12 @@ namespace ServiceAbonents.Data
     public class AbonentRepo : IAbonentRepo
     {
         private readonly AppDbContext _context;
-        //private readonly ISender _send;
-        public AbonentRepo(AppDbContext context)
+        private readonly IDebiting _debiting;
+
+        public AbonentRepo(AppDbContext context, IDebiting debiting)
         {
             _context = context;
-            //_send = send;
+            _debiting = debiting;
         }
 
         public void CreateAbonent(Abonent abonent)
@@ -21,10 +22,8 @@ namespace ServiceAbonents.Data
             if (abonent == null)
                 throw new ArgumentNullException(nameof(abonent));
 
-            //_send.SendMessage(new TransactionDto { Amount = 1, AbonentId = 1, OperationType = "1", PaymentMethod = "1" });
             _context.Abonents.Add(abonent);
-            Debiting.Debiting.AddNewAbonent(abonent);
-            //_send.SendMessage(abonent);
+            _debiting.AddNewAbonent(abonent);
         }
 
         public Abonent GetAbonentById(int id)
