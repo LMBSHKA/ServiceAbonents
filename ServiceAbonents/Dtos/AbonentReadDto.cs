@@ -12,6 +12,6 @@ namespace ServiceAbonents.Dtos
         public string PhoneNumber { get; set; }
         public string PasportData { get; set; }
         public decimal Balance { get; set; }
-        //public string DateForDeduct { get; set; }
+        public string DateForDeduct { get; set; }
     }
 }

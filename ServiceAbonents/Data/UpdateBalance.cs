@@ -9,15 +9,12 @@ namespace ServiceAbonents.Data
     public class UpdateBalance : IUpdateBalance
     {
         private static readonly string connectionString = "Server=localhost;Port=5432;Database=ServiceAbonents_AT;User Id=postgres;Password=admin";
-        //private readonly IDebiting _debiting;
-
-        //public UpdateBalance(IDebiting debiting)
-        //{
-        //    _debiting = debiting;
-        //}
 
         public bool TopUpAndDebitingBalance(TopUpDto newBalance)
         {
+            if (newBalance.Amount == 0)
+                return true;
+
             using var con = new NpgsqlConnection(connectionString);
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseNpgsql(con)

@@ -1,17 +1,9 @@
 ﻿using AutoMapper;
-//using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServiceAbonents.Data;
 using ServiceAbonents.Dtos;
 using ServiceAbonents.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Principal;
-using System.Text;
-
-using RabbitMQ;
 
 namespace ServiceAbonents.Controllers
 {
@@ -57,10 +49,7 @@ namespace ServiceAbonents.Controllers
         {
             var abonentModel = _mapper.Map<Abonent>(abonentCreateDto);
             _repository.CreateAbonent(abonentModel);
-            _repository.SaveChange();
             var abonentReadDto = _mapper.Map<AbonentReadDto>(abonentModel);
-            //Для возврата json файла с параметрами созданного объекта
-            //var res = CreatedAtRoute(nameof(GetAbonentById), new { Id = abonentReadDto.Id }, abonentReadDto);
             var remain = new Remain { ClientId = abonentReadDto.Id, ReaminGb = 0, RemainMin = 0, RemainSMS = 0 };
             _remainRepository.CreateRemain(remain);
             _remainRepository.SaveChanges();

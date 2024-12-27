@@ -9,6 +9,6 @@
         public string PhoneNumber { get; set; } = string.Empty;
         public string PasportData { get; set; } = string.Empty;
         public decimal Balance { get; set; } = 0;
-        //public string DateForDeduct { get; set; } = string.Empty;
+        public string DateForDeduct { get; set; } = string.Empty;
     }
 }

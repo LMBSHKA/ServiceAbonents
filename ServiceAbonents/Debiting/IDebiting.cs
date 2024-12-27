@@ -5,11 +5,15 @@ namespace ServiceAbonents.Debiting
 {
     public interface IDebiting
     {
-        Abonent FindAbonents(int id);
-        void AddNewAbonent(Abonent abonent);
-        void RemoveAbonent(Abonent abonent);
-        void Update(Abonent abonent);
+        DebitingAbonentDto FindNewAbonent(int id);
+        DebitingAbonentDto FindOldAbonent(int id);
+        void AddNewAbonent(DebitingAbonentDto abonent);
+        void AddOldAbonent(DebitingAbonentDto abonent);
+        void UpdateNewAbonent(DebitingAbonentDto abonent);
+        void UpdateOldAbonent(DebitingAbonentDto abonent);
         bool ExamTransaction(TopUpDto newBalance);
+        TransactionDto SetTransaction(int id, decimal amount);
+        void UpdateDate(int id);
 
     }
 }

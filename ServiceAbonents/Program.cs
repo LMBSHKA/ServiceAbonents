@@ -1,16 +1,13 @@
-using Autofac.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using ServiceAbonents.Data;
 using ServiceAbonents.Debiting;
-using ServiceAbonents.Models;
 using ServiceAbonents.RabbitMq;
-using System.IdentityModel.Tokens.Jwt;
-using Volo.Abp.Data;
-
+using Microsoft.Extensions.Hosting;
+using Quartz;
+using Autofac.Core;
+using Microsoft.Extensions.Configuration;
 
 internal class Program
 {
@@ -18,17 +15,43 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        var identityUrl = builder.Configuration.GetValue<string>("IdentityUrl");
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+
+        }).AddJwtBearer(options =>
+        {
+            options.Authority = identityUrl;
+            options.RequireHttpsMetadata = false;
+            options.Audience = "abonent";
+        });
+
         //Connect Db
         builder.Services.AddDbContext<AppDbContext>(opt =>
         {
             opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
         });
 
-        //очистка БД
-        var cleaner = new DatabaseCleaner(builder.Configuration.GetConnectionString("DefaultConnection"));
-        cleaner.ClearDatabase();
+        //DB cleaner
+        //var cleaner = new DatabaseCleaner(builder.Configuration.GetConnectionString("DefaultConnection"));
+        //cleaner.ClearDatabase();
+
+        // build quartz
+        builder.Services.AddQuartz(q =>
+        {
+            var jobKey = new JobKey("deb");
+            q.AddJob<MothlyDebiting>(opts => opts.WithIdentity(jobKey));
+
+                q.AddTrigger(opts => opts
+                    .ForJob(jobKey)
+                    .WithIdentity("Debiting-trigger")
+                    .WithCronSchedule(CronScheduleBuilder.DailyAtHourAndMinute(18, 30)));
+        });
 
         // Add services to the container.
+        builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         builder.Services.AddHostedService<RabbitMqListener>();
 
         builder.Services.AddScoped<ISender, RabbitMqSender>();
@@ -53,7 +76,7 @@ internal class Program
         }
         
         //PrepDb.PrepPopulation(app);
-        
+
         //app.UseHttpsRedirection();
 
         app.UseAuthorization();
@@ -65,23 +88,24 @@ internal class Program
     }
 }
 
-public class DatabaseCleaner
-{
-    private readonly string _connectionString;
 
-    public DatabaseCleaner(string connectionString)
-    {
-        _connectionString = connectionString;
-    }
-    public void ClearDatabase()
-    {
-        var serviceProvider = new ServiceCollection()
-           .AddDbContext<AppDbContext>(options => options.UseNpgsql(_connectionString))
-           .BuildServiceProvider();
+//public class DatabaseCleaner
+//{
+//    private readonly string _connectionString;
 
-        using var context = serviceProvider.GetRequiredService<AppDbContext>();
+//    public DatabaseCleaner(string connectionString)
+//    {
+//        _connectionString = connectionString;
+//    }
+//    public void ClearDatabase()
+//    {
+//        var serviceProvider = new ServiceCollection()
+//           .AddDbContext<AppDbContext>(options => options.UseNpgsql(_connectionString))
+//           .BuildServiceProvider();
 
-        // Удаляем существующую базу данных (если есть)
-        context.Database.EnsureDeleted();
-    }
-}
+//        using var context = serviceProvider.GetRequiredService<AppDbContext>();
+
+//        // Удаляем существующую базу данных (если есть)
+//        context.Database.EnsureDeleted();
+//    }
+//}

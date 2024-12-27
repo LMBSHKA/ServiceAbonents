@@ -23,7 +23,12 @@ namespace ServiceAbonents.Data
                 throw new ArgumentNullException(nameof(abonent));
 
             _context.Abonents.Add(abonent);
-            _debiting.AddNewAbonent(abonent);
+            SaveChange();
+            _debiting.AddNewAbonent(new DebitingAbonentDto {
+                Id = abonent.Id,
+                TarrifId = abonent.TarrifId,
+                Balance = abonent.Balance
+            });
         }
 
         public Abonent GetAbonentById(int id)
@@ -73,10 +78,10 @@ namespace ServiceAbonents.Data
                 if (updateAbonent.Balance != 0)
                     abonent.Balance = updateAbonent.Balance;
 
-                //if (updateAbonent.DateForDeduct != string.Empty)
-                //    abonent.DateForDeduct = DateTime.Now.ToString("dd.MM.yyyy");
+                if (updateAbonent.DateForDeduct != string.Empty)
+                    abonent.DateForDeduct = updateAbonent.DateForDeduct;
 
-                _context.Update(updateAbonent);
+                _context.Update(abonent);
                 _context.SaveChanges();
             }
         }
