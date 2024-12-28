@@ -8,9 +8,9 @@ namespace ServiceAbonents.Data
     public interface IAbonentRepo
     {
         bool SaveChange();
-        IEnumerable<Abonent> GetAllAbonents();
-        Abonent GetAbonentById(int id);
-        void CreateAbonent(Abonent abonent);
+        IEnumerable<User> GetAllAbonents();
+        User GetAbonentById(int id);
+        void CreateAbonent(User abonent);
         int GetTariffIdByAbonentId(int id);
         void Update(int id, AbonentsUpdateDto updateAbonent);
     }

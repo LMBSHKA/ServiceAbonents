@@ -8,8 +8,8 @@ namespace ServiceAbonents.Profiles
     {
         public AbonentsProfile() 
         {
-            CreateMap<Abonent, AbonentReadDto>();
-            CreateMap<AbonentCreateDto, Abonent>();
+            CreateMap<User, AbonentReadDto>();
+            CreateMap<AbonentCreateDto, User>();
         }
     }
 }

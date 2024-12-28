@@ -2,13 +2,10 @@
 
 namespace ServiceAbonents.Models
 {
-    public class Remain
+    public class Remain : BaseEntity
     {
-        [Key]
         [Required]
-        public int Id { get; set; } 
-        [Required]
-        public int ClientId { get; set; }
+        public Guid ClientId { get; set; }
         public short ReaminGb { get; set; }
         public short RemainMin { get; set; }
         public short RemainSMS { get; set; }

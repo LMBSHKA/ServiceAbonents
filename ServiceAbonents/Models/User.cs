@@ -1,13 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Runtime.CompilerServices;
 
 namespace ServiceAbonents.Models
 {
-    public class Abonent
+    public class User : BaseEntity
     {
-        [Key]
-        [Required]
-        public int Id { get; set; }
         [Required]
         public int TarrifId { get; set; }
         [Required]
@@ -19,9 +17,14 @@ namespace ServiceAbonents.Models
         [Required]
         public string PhoneNumber { get; set; }
         [Required]
+        public string Password { get; set; } = string.Empty;
+        [Required]
         public string PasportData { get; set; }
         [Required]
         public decimal Balance { get; set; }
+        [Required]
+        public bool Status { get; set; } = false;
+        public List<Role> Roles { get; set; } = new();
         public string DateForDeduct { get; set; }
     }
 }

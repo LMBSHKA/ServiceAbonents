@@ -47,7 +47,7 @@ namespace ServiceAbonents.Controllers
         [HttpPost]
         public ActionResult<AbonentCreateDto> CreateAbonent(AbonentCreateDto abonentCreateDto)
         {
-            var abonentModel = _mapper.Map<Abonent>(abonentCreateDto);
+            var abonentModel = _mapper.Map<User>(abonentCreateDto);
             _repository.CreateAbonent(abonentModel);
             var abonentReadDto = _mapper.Map<AbonentReadDto>(abonentModel);
             var remain = new Remain { ClientId = abonentReadDto.Id, ReaminGb = 0, RemainMin = 0, RemainSMS = 0 };

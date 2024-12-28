@@ -17,7 +17,7 @@ namespace ServiceAbonents.Data
             _debiting = debiting;
         }
 
-        public void CreateAbonent(Abonent abonent)
+        public void CreateAbonent(User abonent)
         {
             if (abonent == null)
                 throw new ArgumentNullException(nameof(abonent));
@@ -31,14 +31,14 @@ namespace ServiceAbonents.Data
             });
         }
 
-        public Abonent GetAbonentById(int id)
+        public User GetAbonentById(int id)
         {
             var abonent = _context.Abonents.FirstOrDefault(x => x.Id == id);
 
             return _context.Abonents.FirstOrDefault(x => x.Id == id);
         }
 
-        public IEnumerable<Abonent> GetAllAbonents()
+        public IEnumerable<User> GetAllAbonents()
         {
             return _context.Abonents.ToList();
         }
