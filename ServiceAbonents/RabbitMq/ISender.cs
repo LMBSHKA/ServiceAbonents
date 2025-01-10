@@ -1,4 +1,5 @@
-﻿using ServiceAbonents.Dtos;
+﻿using JetBrains.Annotations;
+using ServiceAbonents.Dtos;
 using ServiceAbonents.Models;
 
 namespace ServiceAbonents.RabbitMq
@@ -7,5 +8,6 @@ namespace ServiceAbonents.RabbitMq
     {
         void SendMessage(object obj);
         Task<bool> SendMessage(TransactionDto transaction);
+        Task<bool> SendMessage(int id);
     }
 }

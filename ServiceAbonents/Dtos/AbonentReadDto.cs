@@ -13,5 +13,7 @@ namespace ServiceAbonents.Dtos
         public string PasportData { get; set; }
         public decimal Balance { get; set; }
         public string DateForDeduct { get; set; }
+        public bool Status { get; set; }
+        public decimal TarifCost { get; set; }
     }
 }

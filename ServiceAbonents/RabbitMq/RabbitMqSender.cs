@@ -47,5 +47,38 @@ namespace ServiceAbonents.RabbitMq
                 return false;
             }
         }
+
+        public async Task<bool> SendMessage(int id)
+        {
+            var factory = new ConnectionFactory() { Uri = _uri };
+            using var connection = await factory.CreateConnectionAsync();
+            var channelOpts = new CreateChannelOptions(
+                publisherConfirmationsEnabled: true,
+                publisherConfirmationTrackingEnabled: true);
+            using var channel = await connection.CreateChannelAsync(channelOpts);
+
+            var properties = new BasicProperties
+            {
+                Persistent = true
+            };
+
+            await channel.ExchangeDeclareAsync(exchange: "GetDataAbonent", type: ExchangeType.Topic);
+            var routingKey = "secretKeyData";
+
+            var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(id));
+
+            try
+            {
+                await channel.BasicPublishAsync(exchange: "GetDataAbonent", routingKey: routingKey, body: body);
+                Console.WriteLine($"[x] sent {id}");
+                return true;
+            }
+
+            catch
+            {
+                Console.WriteLine("Message was not sent");
+                return false;
+            }
+        }
     }
 }

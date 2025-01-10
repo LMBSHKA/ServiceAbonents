@@ -6,17 +6,19 @@ namespace ServiceAbonents.Debiting
 {
     public class Debiting : IDebiting
     {
+        private readonly AppDbContext _context;
         private static List<DebitingAbonentDto> _newAbonents = new List<DebitingAbonentDto>();
         private static List<DebitingAbonentDto> _oldAbonents = new List<DebitingAbonentDto>();
         private readonly IUpdateBalance _updateBalance;
         private readonly ISender _send;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public Debiting(ISender send, IUpdateBalance updateBalance, IServiceScopeFactory scopeFactory)
+        public Debiting(ISender send, IUpdateBalance updateBalance, IServiceScopeFactory scopeFactory, AppDbContext context)
         {
             _updateBalance = updateBalance;
             _send = send;
             _scopeFactory = scopeFactory;
+            _context = context;
         }
 
         public DebitingAbonentDto FindNewAbonent(int id) => _newAbonents.FirstOrDefault(x => x.Id == id);
@@ -43,29 +45,28 @@ namespace ServiceAbonents.Debiting
 
         public bool ExamTransaction(TopUpDto newBalance)
         {
-            var tariffCost = 500;
             var newAbonent = FindNewAbonent(newBalance.ClientId);
 
             if (newAbonent == null)
             {
                 var oldAbonent = FindOldAbonent(newBalance.ClientId);
                 if (oldAbonent != null)
-                    return DebitingOldAbonents(oldAbonent, tariffCost, newBalance);
+                    return DebitingOldAbonents(oldAbonent, oldAbonent.TarifCost, newBalance);
             }
 
             if (newAbonent != null && newAbonent.Balance > 0 && 
-                newAbonent.Balance + newBalance.Amount - tariffCost >= 0)
-                return BalanceMoreThenZero(newAbonent, newBalance, tariffCost);
+                newAbonent.Balance + newBalance.Amount - newAbonent.TarifCost >= 0)
+                return BalanceMoreThenZero(newAbonent, newBalance, newAbonent.TarifCost);
 
-            if (newBalance.Amount < 0 || (newAbonent != null && newBalance.Amount < tariffCost) ||
+            if (newBalance.Amount < 0 || (newAbonent != null && newBalance.Amount < newAbonent.TarifCost) ||
                 newAbonent == null)
                 return TopUpOrDebiting(newAbonent, newBalance);
 
-            return SingleTransactionForDebiting(newAbonent, tariffCost, newBalance);
+            return SingleTransactionForDebiting(newAbonent, newAbonent.TarifCost, newBalance);
         }
 
         private bool SingleTransactionForDebiting(DebitingAbonentDto newAbonent, 
-            int tariffCost, TopUpDto newBalance)
+            decimal tariffCost, TopUpDto newBalance)
         {
             _updateBalance.TopUpAndDebitingBalance(new TopUpDto
             {
@@ -79,7 +80,7 @@ namespace ServiceAbonents.Debiting
             return _send.SendMessage(SetTransaction(newBalance.ClientId, tariffCost)).Result;
         }
 
-        private bool BalanceMoreThenZero(DebitingAbonentDto newAbonent, TopUpDto newBalance, int tariffCost)
+        private bool BalanceMoreThenZero(DebitingAbonentDto newAbonent, TopUpDto newBalance, decimal tariffCost)
         {
             _newAbonents.Remove(newAbonent);
             _send.SendMessage(SetTransaction(newBalance.ClientId, tariffCost));
@@ -104,8 +105,9 @@ namespace ServiceAbonents.Debiting
             return result;
         }
 
-        private bool DebitingOldAbonents(DebitingAbonentDto oldAbonent, int tariffCost, TopUpDto newBalance)
+        private bool DebitingOldAbonents(DebitingAbonentDto oldAbonent, decimal tariffCost, TopUpDto newBalance)
         {
+            Console.WriteLine("Денег не хватает");
             if (newBalance.Amount + oldAbonent.Balance >= tariffCost)
             {
                 _updateBalance.TopUpAndDebitingBalance(new TopUpDto
@@ -128,7 +130,6 @@ namespace ServiceAbonents.Debiting
                 ClientId = oldAbonent.Id,
                 Amount = newBalance.Amount
             });
-
         }
 
         public void UpdateDate(int id)
@@ -136,10 +137,11 @@ namespace ServiceAbonents.Debiting
             using (var scope = _scopeFactory.CreateAsyncScope())
             {
                 var repo = scope.ServiceProvider.GetRequiredService<IAbonentRepo>();
-                repo.Update(id, new AbonentsUpdateDto
-                {
-                    DateForDeduct = DateTime.Now.AddMonths(1).ToString("dd.MM.yyyy ")
-                });
+                var abonent = repo.GetAbonentById(id);
+                abonent.DateForDeduct = DateTime.Now.AddMonths(1).ToString("dd.MM.yyyy ");
+                abonent.Status = true;
+                _context.Update(abonent);
+                _context.SaveChanges();
             }
         }
 
@@ -148,9 +150,8 @@ namespace ServiceAbonents.Debiting
             return new TransactionDto
             {
                 ClientId = id,
-                Amount = amount,
-                PaymentMethod = "Balance",
-                OperationType = "Mothly transaction"
+                Amount = -amount,
+                PaymentMethod = "Balance"
             };
         }
     }

@@ -2,14 +2,12 @@
 
 namespace ServiceAbonents.Dtos
 {
-    public class DebitingAbonentDto
+    public class UpdateNewAbonentDto
     {
         [Required]
-        public int Id { get; set; }
+        public string PhoneNumber { get; set; }
         [Required]
-        public int TarrifId { get; set; }
-        [Required]
-        public decimal Balance { get; set; }
+        public int TarifId { get; set; }
         [Required]
         public decimal TarifCost { get; set; }
     }

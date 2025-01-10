@@ -10,7 +10,5 @@ namespace ServiceAbonents.Dtos
         public decimal Amount { get; set; }
         [Required]
         public string PaymentMethod { get; set; }
-        [Required]
-        public string OperationType { get; set; }
     }
 }
