@@ -10,8 +10,10 @@ namespace ServiceAbonents.Data
         bool SaveChange();
         IEnumerable<Abonent> GetAllAbonents();
         Abonent GetAbonentById(int id);
-        void CreateAbonent(Abonent abonent);
+        Abonent CreateAbonent(AbonentCreateDto abonent);
         int GetTariffIdByAbonentId(int id);
         void Update(int id, AbonentsUpdateDto updateAbonent);
+        void UpdateNewAbonent(int id, UpdateNewAbonentDto newAbonent);
+        void CreateSimilarAbonent(TransferDataAbonentDto newAbonent);
     }
 }

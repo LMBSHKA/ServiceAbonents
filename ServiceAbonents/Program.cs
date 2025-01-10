@@ -8,6 +8,11 @@ using Microsoft.Extensions.Hosting;
 using Quartz;
 using Autofac.Core;
 using Microsoft.Extensions.Configuration;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 internal class Program
 {
@@ -15,7 +20,18 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        var identityUrl = builder.Configuration.GetValue<string>("IdentityUrl");
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Version = "v1",
+                Title = "Abonents API",
+                Description = "управление пользоваителями",
+            });
+        });
+
+        var identityUrl = builder.Configuration.GetValue<string>("JwtPrivateKey");
+
         builder.Services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
@@ -35,8 +51,8 @@ internal class Program
         });
 
         //DB cleaner
-        //var cleaner = new DatabaseCleaner(builder.Configuration.GetConnectionString("DefaultConnection"));
-        //cleaner.ClearDatabase();
+        var cleaner = new DatabaseCleaner(builder.Configuration.GetConnectionString("DefaultConnection"));
+        cleaner.ClearDatabase();
 
         // build quartz
         builder.Services.AddQuartz(q =>
@@ -47,13 +63,14 @@ internal class Program
                 q.AddTrigger(opts => opts
                     .ForJob(jobKey)
                     .WithIdentity("Debiting-trigger")
-                    .WithCronSchedule(CronScheduleBuilder.DailyAtHourAndMinute(18, 30)));
+                    .WithCronSchedule(CronScheduleBuilder.DailyAtHourAndMinute(00, 00)));
         });
 
         // Add services to the container.
         builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         builder.Services.AddHostedService<RabbitMqListener>();
 
+        builder.Services.AddScoped<ISwitchTarif, SwitchTarif>();
         builder.Services.AddScoped<ISender, RabbitMqSender>();
         builder.Services.AddScoped<IDebiting, Debiting>();
         builder.Services.AddScoped<IUpdateBalance, UpdateBalance>();
@@ -89,23 +106,23 @@ internal class Program
 }
 
 
-//public class DatabaseCleaner
-//{
-//    private readonly string _connectionString;
+public class DatabaseCleaner
+{
+    private readonly string _connectionString;
 
-//    public DatabaseCleaner(string connectionString)
-//    {
-//        _connectionString = connectionString;
-//    }
-//    public void ClearDatabase()
-//    {
-//        var serviceProvider = new ServiceCollection()
-//           .AddDbContext<AppDbContext>(options => options.UseNpgsql(_connectionString))
-//           .BuildServiceProvider();
+    public DatabaseCleaner(string connectionString)
+    {
+        _connectionString = connectionString;
+    }
+    public void ClearDatabase()
+    {
+        var serviceProvider = new ServiceCollection()
+           .AddDbContext<AppDbContext>(options => options.UseNpgsql(_connectionString))
+           .BuildServiceProvider();
 
-//        using var context = serviceProvider.GetRequiredService<AppDbContext>();
+        using var context = serviceProvider.GetRequiredService<AppDbContext>();
 
-//        // Удаляем существующую базу данных (если есть)
-//        context.Database.EnsureDeleted();
-//    }
-//}
+        // Удаляем существующую базу данных (если есть)
+        context.Database.EnsureDeleted();
+    }
+}
