@@ -32,11 +32,11 @@ namespace ServiceAbonents.Data
 
             if (abonent != null)
             {
-                if (!newTarif.Tarif.IsNullOrEmpty())
+                if (!newTarif.Tariff.IsNullOrEmpty())
                 {
                     decimal newTarifCost = 500;
-                    abonent.TarifCost = newTarifCost;
-                    abonent.TarrifId = newTarif.Tarif;
+                    abonent.TariffCost = newTarifCost;
+                    abonent.TarriffId = newTarif.Tariff;
                     _context.Update(abonent);
                     _context.SaveChanges();
 
@@ -49,9 +49,9 @@ namespace ServiceAbonents.Data
                         _debiting.AddOldAbonent(new DebitingAbonentDto
                         {
                             Id = abonent.Id,
-                            TarifCost = newTarifCost,
+                            TariffCost = newTarifCost,
                             Balance = abonent.Balance,
-                            TarrifId = newTarif.Tarif
+                            TarriffId = newTarif.Tariff
                         });
                 }
             }

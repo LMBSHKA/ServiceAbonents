@@ -72,10 +72,10 @@ namespace ServiceAbonents.RabbitMq
 
                     debiting.AddNewAbonent(new DebitingAbonentDto
                     {
-                        TarrifId = dataAbonents[i].TarifId,
+                        TarriffId = dataAbonents[i].TariffId,
                         Id = dataAbonents[i].AbonentId,
                         Balance = 0,
-                        TarifCost = dataAbonents[i].TarifCost
+                        TariffCost = dataAbonents[i].TariffCost
                     });
                 }
             }
@@ -85,7 +85,7 @@ namespace ServiceAbonents.RabbitMq
         {
             return new UpdateNewAbonentDto
             {
-                TarifId = data.TarifId,
+                TariffId = data.TariffId,
                 PhoneNumber = data.PhoneNumber
             };
         }

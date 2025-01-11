@@ -51,18 +51,18 @@ namespace ServiceAbonents.Debiting
             {
                 var oldAbonent = FindOldAbonent(newBalance.ClientId);
                 if (oldAbonent != null)
-                    return DebitingOldAbonents(oldAbonent, oldAbonent.TarifCost, newBalance);
+                    return DebitingOldAbonents(oldAbonent, oldAbonent.TariffCost, newBalance);
             }
 
             if (newAbonent != null && newAbonent.Balance > 0 && 
-                newAbonent.Balance + newBalance.Amount - newAbonent.TarifCost >= 0)
-                return BalanceMoreThenZero(newAbonent, newBalance, newAbonent.TarifCost);
+                newAbonent.Balance + newBalance.Amount - newAbonent.TariffCost >= 0)
+                return BalanceMoreThenZero(newAbonent, newBalance, newAbonent.TariffCost);
 
-            if (newBalance.Amount < 0 || (newAbonent != null && newBalance.Amount < newAbonent.TarifCost) ||
+            if (newBalance.Amount < 0 || (newAbonent != null && newBalance.Amount < newAbonent.TariffCost) ||
                 newAbonent == null)
                 return TopUpOrDebiting(newAbonent, newBalance);
 
-            return SingleTransactionForDebiting(newAbonent, newAbonent.TarifCost, newBalance);
+            return SingleTransactionForDebiting(newAbonent, newAbonent.TariffCost, newBalance);
         }
 
         private bool SingleTransactionForDebiting(DebitingAbonentDto newAbonent, 

@@ -7,10 +7,10 @@ namespace ServiceAbonents.Dtos
         [Required]
         public Guid Id { get; set; }
         [Required]
-        public string TarrifId { get; set; }
+        public string TarriffId { get; set; }
         [Required]
         public decimal Balance { get; set; }
         [Required]
-        public decimal TarifCost { get; set; }
+        public decimal TariffCost { get; set; }
     }
 }
