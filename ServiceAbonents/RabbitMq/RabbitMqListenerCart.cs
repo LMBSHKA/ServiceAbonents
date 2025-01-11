@@ -72,7 +72,7 @@ namespace ServiceAbonents.RabbitMq
 
                     debiting.AddNewAbonent(new DebitingAbonentDto
                     {
-                        TarriffId = dataAbonents[i].TariffId,
+                        TariffId = dataAbonents[i].TariffId,
                         Id = dataAbonents[i].AbonentId,
                         Balance = 0,
                         TariffCost = dataAbonents[i].TariffCost

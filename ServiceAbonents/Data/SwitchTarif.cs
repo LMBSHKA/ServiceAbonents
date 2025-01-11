@@ -36,7 +36,7 @@ namespace ServiceAbonents.Data
                 {
                     decimal newTarifCost = 500;
                     abonent.TariffCost = newTarifCost;
-                    abonent.TarriffId = newTarif.Tariff;
+                    abonent.TariffId = newTarif.Tariff;
                     _context.Update(abonent);
                     _context.SaveChanges();
 
@@ -51,7 +51,7 @@ namespace ServiceAbonents.Data
                             Id = abonent.Id,
                             TariffCost = newTarifCost,
                             Balance = abonent.Balance,
-                            TarriffId = newTarif.Tariff
+                            TariffId = newTarif.Tariff
                         });
                 }
             }

@@ -36,7 +36,7 @@ namespace ServiceAbonents.Debiting
                         {
                             Id = e.Id,
                             Balance = e.Balance,
-                            TarriffId = e.TarriffId
+                            TariffId = e.TariffId
                         });
 
                     else

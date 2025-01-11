@@ -50,7 +50,7 @@ namespace ServiceAbonents.Data
             var newAbonent = new Abonent
             {
                 Id = new Guid(),
-                TarriffId = update.TariffId,
+                TariffId = update.TariffId,
                 PhoneNumber = update.PhoneNumber,
                 Name = abonent.Name,
                 Surname = abonent.Surname,
@@ -80,7 +80,7 @@ namespace ServiceAbonents.Data
             }
 
             else
-                _sender.SendMessage(new IdForTarifDto { AbonentId = newAbonent.Id, TariffId = newAbonent.TarriffId });
+                _sender.SendMessage(new IdForTarifDto { AbonentId = newAbonent.Id, TariffId = newAbonent.TariffId });
         }
 
         public Abonent GetAbonentById(Guid id)
@@ -94,7 +94,7 @@ namespace ServiceAbonents.Data
             EF.Functions.Like(p.Name!, $"%{filter.Name}%") ||
             EF.Functions.Like(p.Surname!, $"%{filter.Surname}%") ||
             EF.Functions.Like(p.PhoneNumber!, $"%{filter.PhoneNumber}%") ||
-            EF.Functions.Like(Convert.ToString(p.TarriffId)!, $"%{filter.TariffId}%") ||
+            EF.Functions.Like(Convert.ToString(p.TariffId)!, $"%{filter.TariffId}%") ||
             EF.Functions.Like(p.Patronymic, $"%{filter.Patronymic}%"));
 
             return abonets.OrderBy(x => x.Id).ToList();
@@ -133,7 +133,7 @@ namespace ServiceAbonents.Data
 
             var abonent = GetAbonentById(id);
 
-            abonent.TarriffId = newAbonent.TariffId;
+            abonent.TariffId = newAbonent.TariffId;
             abonent.PhoneNumber = newAbonent.PhoneNumber;
             abonent.TariffCost = newAbonent.TariffCost;
 
