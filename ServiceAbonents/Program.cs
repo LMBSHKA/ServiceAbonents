@@ -6,6 +6,7 @@ using Quartz;
 using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Autofac.Core;
 
 internal class Program
 {
@@ -13,13 +14,24 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder.SetIsOriginAllowed(origin => true)
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .AllowCredentials();
+            });
+        });
+
         builder.Services.AddSwaggerGen(options =>
         {
             options.SwaggerDoc("v1", new OpenApiInfo
             {
                 Version = "v1",
                 Title = "Abonents API",
-                Description = "управление пользоваителями",
+                Description = "управление пользоваителями ссылка на сайт - https://serviceabonents-2.onrender.com",
             });
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -95,6 +107,9 @@ internal class Program
         // Add services to the container.
         builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         builder.Services.AddHostedService<RabbitMqListener>();
+        builder.Services.AddHostedService<RabbitMqListenerCart>();
+        builder.Services.AddHostedService<RabbitMqListenerAuth>();
+        builder.Services.AddHostedService<RabbitMqListenerTarif>();
 
         builder.Services.AddScoped<ISwitchTarif, SwitchTarif>();
         builder.Services.AddScoped<ISender, RabbitMqSender>();
@@ -107,7 +122,13 @@ internal class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            var basePath = AppContext.BaseDirectory;
+
+            var xmlPath = Path.Combine(basePath, "ServiceAbonents.xml");
+            options.IncludeXmlComments(xmlPath);
+        });
 
         var app = builder.Build();
 
@@ -115,9 +136,14 @@ internal class Program
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.yaml", "v1");
+            });
         }
-        
+
+        app.UseCors();
+
         //PrepDb.PrepPopulation(app);
 
         //app.UseHttpsRedirection();
