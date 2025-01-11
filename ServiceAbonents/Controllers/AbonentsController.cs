@@ -26,6 +26,15 @@ namespace ServiceAbonents.Controllers
         }
 
         //[Authorize]
+        /// <summary>
+        /// Получение всех пользователей
+        /// Фильтрация происходит по ФИО, номеру телефона, Id-тарифа
+        /// </summary>
+        /// <param name="model">абонента</param>
+        /// <returns></returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
+        /// <response code="500">Ошибка сервера</response>
         [HttpGet]
         public ActionResult<IEnumerable<AbonentReadDto>> GetAbonents([FromQuery] FilterDto filter,
             [FromQuery] int page = 1)
@@ -47,6 +56,15 @@ namespace ServiceAbonents.Controllers
         }
 
         //[Authorize]
+        /// <summary>
+        /// Получение всех пользователей
+        /// Фильтрация происходит по ФИО, номеру телефона, Id-тарифа
+        /// </summary>
+        /// <param name="model">абонента</param>
+        /// <returns></returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
+        /// <response code="500">Ошибка сервера</response>
         [HttpGet("{id}")]
         public ActionResult<AbonentReadDto> GetAbonentById(Guid id)
         {
