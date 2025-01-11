@@ -6,8 +6,9 @@ namespace ServiceAbonents.RabbitMq
 {
     public interface ISender
     {
-        void SendMessage(object obj);
         Task<bool> SendMessage(TransactionDto transaction);
-        Task<bool> SendMessage(int id);
+        Task<bool> SendMessage(IdForCartDto idForCart);
+        Task<bool> SendMessage(IdForTarifDto idForTarif);
+        Task<bool> SendMessage(TransferForAuthDto data);
     }
 }

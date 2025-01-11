@@ -7,8 +7,6 @@ using ServiceAbonents.Models;
 
 namespace ServiceAbonents.Controllers
 {
-    //параметр который не дает доступ без авторизации то есть без jwt токена
-    //[Authorize]
     [Route("v1/Abonents/")]
     [ApiController]
     public class AbonentsController : ControllerBase
@@ -27,14 +25,16 @@ namespace ServiceAbonents.Controllers
             _switch = switchTarif;
         }
 
+        //[Authorize]
         [HttpGet]
-        public ActionResult<IEnumerable<AbonentReadDto>> GetAbonents([FromQuery] int page = 1)
+        public ActionResult<IEnumerable<AbonentReadDto>> GetAbonents([FromQuery] FilterDto filter,
+            [FromQuery] int page = 1)
         {
             Console.WriteLine("Get Abonents");
             if (page <= 0)
                 return BadRequest("Invalid page number");
 
-            var abonentItem = _repository.GetAllAbonents();
+            var abonentItem = _repository.GetAllAbonents(filter);
 
             if (!abonentItem.Any())
                 return NoContent();
@@ -46,8 +46,9 @@ namespace ServiceAbonents.Controllers
             return Ok(_mapper.Map<IEnumerable<AbonentReadDto>>(pagedItems));
         }
 
+        //[Authorize]
         [HttpGet("{id}")]
-        public ActionResult<AbonentReadDto> GetAbonentById(int id)
+        public ActionResult<AbonentReadDto> GetAbonentById(Guid id)
         {
             Console.WriteLine("Get abonent by id");
             var abonentItem = _repository.GetAbonentById(id);
@@ -59,11 +60,11 @@ namespace ServiceAbonents.Controllers
         }
 
         [HttpPost]
-        public ActionResult<AbonentCreateDto> CreateAbonent(AbonentCreateDto newAbonent)
+        public ActionResult<AbonentCreateDto> CreateAbonent(AbonentCreateDto newAbonent, Guid temporaryId)
         {
-            var abonent = _repository.CreateAbonent(newAbonent);
+            var abonent = _repository.CreateAbonent(newAbonent, temporaryId);
             var abonentReadDto = _mapper.Map<AbonentReadDto>(abonent);
-            var remain = new Remain { ClientId = abonentReadDto.Id, ReaminGb = 0, RemainMin = 0, RemainSMS = 0 };
+            var remain = new Remain { ClientId = abonentReadDto.Id, };
 
             _remainRepository.CreateRemain(remain);
             _remainRepository.SaveChanges();
@@ -71,15 +72,17 @@ namespace ServiceAbonents.Controllers
             return Ok();
         }
 
+        //[Authorize]
         [HttpPut]
-        public ActionResult UpdatePut(int id, AbonentsUpdateDto updateAbonent)
+        public ActionResult UpdatePut(Guid id, AbonentsUpdateDto updateAbonent)
         {
             _repository.Update(id, updateAbonent);
             return Ok();
         }
 
+        //[Authorize]
         [HttpPut("SwitchTarif")]
-        public ActionResult SwitchTarif(int abonentId, SwitchTarifDto newTarif)
+        public ActionResult SwitchTarif(Guid abonentId, SwitchTarifDto newTarif)
         {
             _switch.UpdateTarif(newTarif, abonentId);
             return Ok();

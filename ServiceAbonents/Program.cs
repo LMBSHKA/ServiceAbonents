@@ -1,16 +1,9 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using ServiceAbonents.Data;
 using ServiceAbonents.Debiting;
 using ServiceAbonents.RabbitMq;
-using Microsoft.Extensions.Hosting;
 using Quartz;
-using Autofac.Core;
-using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -28,6 +21,33 @@ internal class Program
                 Title = "Abonents API",
                 Description = "управление пользоваителями",
             });
+
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = "Please enter JWT with Bearer into field",
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                BearerFormat = "JWT",
+                Scheme = "Bearer"
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type=ReferenceType.SecurityScheme,
+                            Id="Bearer"
+                        }
+                    },
+                    new string[]{}
+                }
+             });
+
+            options.CustomSchemaIds(type => type.ToString());
         });
 
         var identityUrl = builder.Configuration.GetValue<string>("JwtPrivateKey");
@@ -39,9 +59,15 @@ internal class Program
 
         }).AddJwtBearer(options =>
         {
-            options.Authority = identityUrl;
-            options.RequireHttpsMetadata = false;
-            options.Audience = "abonent";
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(identityUrl)),
+            };
         });
 
         //Connect Db

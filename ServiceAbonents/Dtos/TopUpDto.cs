@@ -5,7 +5,7 @@ namespace ServiceAbonents.Dtos
     public class TopUpDto
     {
         [Required]
-        public int ClientId { get; set; }
+        public Guid ClientId { get; set; }
         [Required]
         public decimal Amount { get ; set; }
 

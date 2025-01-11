@@ -27,13 +27,12 @@ namespace ServiceAbonents.Data
             {
                 try
                 {
-                    var abonent = context.Abonents.FirstOrDefault(x => x.Id == newBalance.ClientId);
+                    var abonent = context.Abonents.FirstOrDefault(x => x.Id.Equals(newBalance.ClientId));
 
                     abonent.Balance = abonent.Balance + newBalance.Amount;
                     context.Update(abonent);
                     context.SaveChanges();
                     transaction.Commit();
-                    var abonent2 = context.Abonents.FirstOrDefault(x => x.Id == newBalance.ClientId);
                     return true;
                 }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using ServiceAbonents.Debiting;
 using ServiceAbonents.Dtos;
 using ServiceAbonents.Models;
@@ -21,28 +22,23 @@ namespace ServiceAbonents.Data
             _remain = remain;
         }
 
-        public Abonent CreateAbonent(AbonentCreateDto newAbonent)
+        public Abonent CreateAbonent(AbonentCreateDto newAbonent, Guid temporaryId)
         {
             if (newAbonent == null)
                 throw new ArgumentNullException(nameof(newAbonent));
 
             var abonent = new Abonent
             {
-                Id = 0,
+                Id = new Guid(),
                 Name = newAbonent.Name,
                 Surname = newAbonent.Surname,
                 Patronymic = newAbonent.Patronymic,
                 PasportData = newAbonent.PasportData,
             };
 
-            _context.Abonents.Add(abonent);
+            _context.Abonents.Update(abonent);
             SaveChange();
-            _sender.SendMessage(abonent.Id);
-            //_debiting.AddNewAbonent(new DebitingAbonentDto {
-            //    Id = abonent.Id,
-            //    TarrifId = abonent.TarrifId,
-            //    Balance = abonent.Balance
-            //});
+            _sender.SendMessage(new IdForCartDto { AbonentId = abonent.Id, TemporaryId = temporaryId });
 
             return abonent;
         }
@@ -52,37 +48,58 @@ namespace ServiceAbonents.Data
             var abonent = GetAbonentById(update.AbonentId);
             var newAbonent = new Abonent
             {
-                Id = 0,
+                Id = new Guid(),
                 TarrifId = update.TarifId,
                 PhoneNumber = update.PhoneNumber,
                 Name = abonent.Name,
                 Surname = abonent.Surname,
                 Patronymic = abonent.Patronymic,
                 PasportData = abonent.PasportData,
+                TarifCost = update.TarifCost
             };
 
             _context.Add(newAbonent);
             _context.SaveChanges();
+
+            if (update.TarifId.Length > 2)
+            {
+                var splitTarif = update.TarifId.Split('-');
+                var remain = new Remain {
+                    ClientId = newAbonent.Id,
+                    RemainGb = short.Parse(splitTarif[0]),
+                    RemainMin = short.Parse(splitTarif[1]),
+                    RemainSMS = short.Parse(splitTarif[2]),
+                    UnlimVideo = bool.Parse(splitTarif[3]),
+                    UnlimSocials = bool.Parse(splitTarif[4]),
+                    UnlimMusic = bool.Parse(splitTarif[5]),
+                    LongDistanceCall = bool.Parse(splitTarif[6])
+                };
+
+                _remain.CreateRemain(remain);
+            }
+
+            else
+                _sender.SendMessage(new IdForTarifDto { AbonentId = newAbonent.Id, TarifId = newAbonent.TarrifId });
         }
 
-        public Abonent GetAbonentById(int id)
+        public Abonent GetAbonentById(Guid id)
         {
-            var abonent = _context.Abonents.FirstOrDefault(x => x.Id == id);
-
             return _context.Abonents.FirstOrDefault(x => x.Id == id);
         }
 
-        public IEnumerable<Abonent> GetAllAbonents()
+        public IEnumerable<Abonent> GetAllAbonents(FilterDto filter)
         {
-            return _context.Abonents.OrderBy(x => x.Id).ToList();
+            var abonets = _context.Abonents.Where(p =>
+            EF.Functions.Like(p.Name!, $"%{filter.Name}%") ||
+            EF.Functions.Like(p.Surname!, $"%{filter.Surname}%") ||
+            EF.Functions.Like(p.PhoneNumber!, $"%{filter.PhoneNumber}%") ||
+            EF.Functions.Like(Convert.ToString(p.TarrifId)!, $"%{filter.TarifId}%") ||
+            EF.Functions.Like(p.Patronymic, $"%{filter.Patronymic}%"));
+
+            return abonets.OrderBy(x => x.Id).ToList();
         }
 
-        public int GetTariffIdByAbonentId(int id)
-        {
-            return GetAbonentById(id).TarrifId;
-        }
-
-        public void Update(int id, AbonentsUpdateDto updateAbonent)
+        public void Update(Guid id, AbonentsUpdateDto updateAbonent)
         {
             if (updateAbonent == null)
                 throw new ArgumentNullException(nameof(updateAbonent));
@@ -91,25 +108,6 @@ namespace ServiceAbonents.Data
 
             if (abonent != null)
             {
-                //if (updateAbonent.TarrifId != 0)
-                //{
-                //    abonent.TarifCost = newTarifCost;
-                //    abonent.TarrifId = updateAbonent.TarrifId;
-
-                //    if (abonent.Balance >= costWithDiscoint)
-                //        _debiting.DebitingSwitchedTarif(abonent.Id, costWithDiscoint, abonent.Balance);
-                //    else
-                //        _debiting.AddOldAbonent(new DebitingAbonentDto
-                //        {
-                //            Id = abonent.Id,
-                //            TarifCost = abonent.TarifCost,
-                //            Balance = abonent.Balance,
-                //            TarrifId = abonent.Id
-                //        });
-
-                //    Console.WriteLine($"Скидка: {costWithDiscoint}");
-                //}
-
                 if (updateAbonent.Name != string.Empty)
                     abonent.Name = updateAbonent.Name;
 
@@ -127,7 +125,7 @@ namespace ServiceAbonents.Data
             }
         }
 
-        public void UpdateNewAbonent(int id, UpdateNewAbonentDto newAbonent)
+        public void UpdateNewAbonent(Guid id, UpdateNewAbonentDto newAbonent)
         {
             if (newAbonent == null)
                 throw new ArgumentNullException(nameof(newAbonent));
@@ -138,6 +136,21 @@ namespace ServiceAbonents.Data
             abonent.PhoneNumber = newAbonent.PhoneNumber;
             abonent.TarifCost = newAbonent.TarifCost;
 
+            if (newAbonent.TarifId.Length > 2)
+            {
+                var splitTarif = newAbonent.TarifId.Split('-');
+                var newRemain = new RemainUpdateDto {
+                    RemainGb = short.Parse(splitTarif[0]),
+                    RemainMin = short.Parse(splitTarif[1]),
+                    RemainSMS = short.Parse(splitTarif[2]),
+                    UnlimVideo = bool.Parse(splitTarif[3]),
+                    UnlimSocials = bool.Parse(splitTarif[4]),
+                    UnlimMusic = bool.Parse(splitTarif[5]),
+                    LongDistanceCall = bool.Parse(splitTarif[6])
+                };
+                _remain.Update(abonent.Id, newRemain);
+            }
+
             _context.Update(abonent);
             _context.SaveChanges();
         }
@@ -145,6 +158,18 @@ namespace ServiceAbonents.Data
         public bool SaveChange()
         {
             return _context.SaveChanges() >= 0;
+        }
+
+        public void GetAbonentByPhoneNumber(string phoneNumber)
+        {
+            var abonent = _context.Abonents.FirstOrDefault(x => x.PhoneNumber == phoneNumber);
+
+            _sender.SendMessage(new TransferForAuthDto 
+            {
+                AbonentId = abonent.Id,
+                PhoneNumber = abonent.PhoneNumber,
+                Role = abonent.Role
+            });
         }
     }
 }

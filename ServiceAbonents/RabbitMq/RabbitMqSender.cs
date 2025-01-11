@@ -9,12 +9,6 @@ namespace ServiceAbonents.RabbitMq
     {
         private readonly Uri _uri = new Uri("amqps://akmeanzg:TMOCQxQAEWZjfE0Y7wH5v0TN_XTQ9Xfv@mouse.rmq5.cloudamqp.com/akmeanzg");
 
-        public void SendMessage(object obj)
-        {
-            var message = JsonSerializer.Serialize(obj);
-            SendMessage(message);
-        }
-
         public async Task<bool> SendMessage(TransactionDto transaction)
         {
             var factory = new ConnectionFactory() { Uri = _uri };
@@ -48,7 +42,7 @@ namespace ServiceAbonents.RabbitMq
             }
         }
 
-        public async Task<bool> SendMessage(int id)
+        public async Task<bool> SendMessage(IdForCartDto idForCart)
         {
             var factory = new ConnectionFactory() { Uri = _uri };
             using var connection = await factory.CreateConnectionAsync();
@@ -65,12 +59,78 @@ namespace ServiceAbonents.RabbitMq
             await channel.ExchangeDeclareAsync(exchange: "GetDataAbonent", type: ExchangeType.Topic);
             var routingKey = "secretKeyData";
 
-            var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(id));
+            var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(idForCart));
 
             try
             {
                 await channel.BasicPublishAsync(exchange: "GetDataAbonent", routingKey: routingKey, body: body);
-                Console.WriteLine($"[x] sent {id}");
+                Console.WriteLine($"[x] sent {idForCart}");
+                return true;
+            }
+
+            catch
+            {
+                Console.WriteLine("Message was not sent");
+                return false;
+            }
+        }
+
+        public async Task<bool> SendMessage(IdForTarifDto idForTarif)
+        {
+            var factory = new ConnectionFactory() { Uri = _uri };
+            using var connection = await factory.CreateConnectionAsync();
+            var channelOpts = new CreateChannelOptions(
+                publisherConfirmationsEnabled: true,
+                publisherConfirmationTrackingEnabled: true);
+            using var channel = await connection.CreateChannelAsync(channelOpts);
+
+            var properties = new BasicProperties
+            {
+                Persistent = true
+            };
+
+            await channel.ExchangeDeclareAsync(exchange: "GetTarif", type: ExchangeType.Topic);
+            var routingKey = "secretKeyTarif";
+
+            var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(idForTarif));
+
+            try
+            {
+                await channel.BasicPublishAsync(exchange: "GetTarif", routingKey: routingKey, body: body);
+                Console.WriteLine($"[x] sent {idForTarif}");
+                return true;
+            }
+
+            catch
+            {
+                Console.WriteLine("Message was not sent");
+                return false;
+            }
+        }
+
+        public async Task<bool> SendMessage(TransferForAuthDto data)
+        {
+            var factory = new ConnectionFactory() { Uri = _uri };
+            using var connection = await factory.CreateConnectionAsync();
+            var channelOpts = new CreateChannelOptions(
+                publisherConfirmationsEnabled: true,
+                publisherConfirmationTrackingEnabled: true);
+            using var channel = await connection.CreateChannelAsync(channelOpts);
+
+            var properties = new BasicProperties
+            {
+                Persistent = true
+            };
+
+            await channel.ExchangeDeclareAsync(exchange: "sendAuth", type: ExchangeType.Topic);
+            var routingKey = "secretKeySendAuth";
+
+            var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data));
+
+            try
+            {
+                await channel.BasicPublishAsync(exchange: "sendAuth", routingKey: routingKey, body: body);
+                Console.WriteLine($"[x] sent {data}");
                 return true;
             }
 

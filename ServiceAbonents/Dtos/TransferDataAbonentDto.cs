@@ -5,11 +5,11 @@ namespace ServiceAbonents.Dtos
     public class TransferDataAbonentDto
     {
         [Required]
-        public int AbonentId { get; set; }
+        public Guid AbonentId { get; set; }
         [Required]
         public string PhoneNumber { get; set; }
         [Required]
-        public int TarifId { get; set; }
+        public string TarifId { get; set; }
         [Required]
         public decimal TarifCost { get; set; }
     }

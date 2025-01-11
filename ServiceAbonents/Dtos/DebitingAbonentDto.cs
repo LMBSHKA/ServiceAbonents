@@ -5,9 +5,9 @@ namespace ServiceAbonents.Dtos
     public class DebitingAbonentDto
     {
         [Required]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [Required]
-        public int TarrifId { get; set; }
+        public string TarrifId { get; set; }
         [Required]
         public decimal Balance { get; set; }
         [Required]

@@ -1,10 +1,11 @@
 ﻿namespace ServiceAbonents.Dtos
 {
-    public class AbonentsUpdateDto
+    public class FilterDto
     {
         public string Name { get; set; } = string.Empty;
         public string Surname { get; set; } = string.Empty;
         public string Patronymic { get; set; } = string.Empty;
-        public string PasportData { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string TarifId { get; set; } = string.Empty;
     }
 }

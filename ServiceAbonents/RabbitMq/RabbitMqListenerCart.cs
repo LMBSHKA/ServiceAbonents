@@ -52,30 +52,30 @@ namespace ServiceAbonents.RabbitMq
             Console.ReadLine();
         }
 
-        public void UpdateAbonent(List<TransferDataAbonentDto> dataAboinents)
+        public void UpdateAbonent(List<TransferDataAbonentDto> dataAbonents)
         {
-            if (dataAboinents == null)
-                throw new ArgumentNullException(nameof(dataAboinents));
+            if (dataAbonents == null)
+                throw new ArgumentNullException(nameof(dataAbonents));
 
             using (var scope = _scopeFactory.CreateAsyncScope())
             {
                 var repo = scope.ServiceProvider.GetRequiredService<IAbonentRepo>();
                 var debiting = scope.ServiceProvider.GetRequiredService<IDebiting>();
 
-                for (int i = 0; i < dataAboinents.Count; i++)
+                for (int i = 0; i < dataAbonents.Count; i++)
                 {
                     if (i == 0)
-                        repo.UpdateNewAbonent(dataAboinents[0].AbonentId, SetParametrs(dataAboinents[i]));
+                        repo.UpdateNewAbonent(dataAbonents[0].AbonentId, SetParametrs(dataAbonents[i]));
 
                     else
-                        repo.CreateSimilarAbonent(dataAboinents[i]);
+                        repo.CreateSimilarAbonent(dataAbonents[i]);
 
                     debiting.AddNewAbonent(new DebitingAbonentDto
                     {
-                        TarrifId = dataAboinents[i].TarifId,
-                        Id = dataAboinents[i].AbonentId,
+                        TarrifId = dataAbonents[i].TarifId,
+                        Id = dataAbonents[i].AbonentId,
                         Balance = 0,
-                        TarifCost = dataAboinents[i].TarifCost
+                        TarifCost = dataAbonents[i].TarifCost
                     });
                 }
             }

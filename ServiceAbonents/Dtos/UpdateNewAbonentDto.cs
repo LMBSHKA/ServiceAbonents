@@ -7,7 +7,7 @@ namespace ServiceAbonents.Dtos
         [Required]
         public string PhoneNumber { get; set; }
         [Required]
-        public int TarifId { get; set; }
+        public string TarifId { get; set; }
         [Required]
         public decimal TarifCost { get; set; }
     }

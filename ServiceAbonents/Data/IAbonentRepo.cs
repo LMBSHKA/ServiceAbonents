@@ -8,12 +8,12 @@ namespace ServiceAbonents.Data
     public interface IAbonentRepo
     {
         bool SaveChange();
-        IEnumerable<Abonent> GetAllAbonents();
-        Abonent GetAbonentById(int id);
-        Abonent CreateAbonent(AbonentCreateDto abonent);
-        int GetTariffIdByAbonentId(int id);
-        void Update(int id, AbonentsUpdateDto updateAbonent);
-        void UpdateNewAbonent(int id, UpdateNewAbonentDto newAbonent);
+        IEnumerable<Abonent> GetAllAbonents(FilterDto filter);
+        Abonent GetAbonentById(Guid id);
+        Abonent CreateAbonent(AbonentCreateDto abonent, Guid TemporaryId);
+        void Update(Guid id, AbonentsUpdateDto updateAbonent);
+        void UpdateNewAbonent(Guid id, UpdateNewAbonentDto newAbonent);
         void CreateSimilarAbonent(TransferDataAbonentDto newAbonent);
+        void GetAbonentByPhoneNumber(string PhoneNumber);
     }
 }

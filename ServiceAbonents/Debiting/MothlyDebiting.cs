@@ -22,7 +22,7 @@ namespace ServiceAbonents.Debiting
         public Task Execute(IJobExecutionContext context)
         {
             Console.WriteLine("work");
-            var listAbonents = _abonentRepo.GetAllAbonents();
+            var listAbonents = _abonentRepo.GetAllAbonents(new Dtos.FilterDto { Name = "", Surname = ""});
             
 
             foreach (var e in listAbonents)

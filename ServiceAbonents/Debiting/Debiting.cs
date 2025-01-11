@@ -21,9 +21,9 @@ namespace ServiceAbonents.Debiting
             _context = context;
         }
 
-        public DebitingAbonentDto FindNewAbonent(int id) => _newAbonents.FirstOrDefault(x => x.Id == id);
+        public DebitingAbonentDto FindNewAbonent(Guid id) => _newAbonents.FirstOrDefault(x => x.Id.Equals(id));
 
-        public DebitingAbonentDto FindOldAbonent(int id) => _oldAbonents.FirstOrDefault(x => x.Id == id);
+        public DebitingAbonentDto FindOldAbonent(Guid id) => _oldAbonents.FirstOrDefault(x => x.Id.Equals(id));
 
         public void AddNewAbonent(DebitingAbonentDto abonent) => _newAbonents.Add(abonent);
 
@@ -132,20 +132,20 @@ namespace ServiceAbonents.Debiting
             });
         }
 
-        public void UpdateDate(int id)
+        public void UpdateDate(Guid id)
         {
             using (var scope = _scopeFactory.CreateAsyncScope())
             {
                 var repo = scope.ServiceProvider.GetRequiredService<IAbonentRepo>();
                 var abonent = repo.GetAbonentById(id);
-                abonent.DateForDeduct = DateTime.Now.AddMonths(1).ToString("dd.MM.yyyy ");
+                abonent.DateForDeduct = DateTime.Now.AddMonths(1).ToString("dd.MM.yyyy");
                 abonent.Status = true;
                 _context.Update(abonent);
                 _context.SaveChanges();
             }
         }
 
-        public TransactionDto SetTransaction(int id, decimal amount)
+        public TransactionDto SetTransaction(Guid id, decimal amount)
         {
             return new TransactionDto
             {

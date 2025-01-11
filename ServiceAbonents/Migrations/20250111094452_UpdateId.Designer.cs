@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ServiceAbonents.Data;
@@ -11,9 +12,11 @@ using ServiceAbonents.Data;
 namespace ServiceAbonents.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250111094452_UpdateId")]
+    partial class UpdateId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,10 +54,6 @@ namespace ServiceAbonents.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<bool>("Status")
                         .HasColumnType("boolean");
 
@@ -83,10 +82,7 @@ namespace ServiceAbonents.Migrations
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("LongDistanceCall")
-                        .HasColumnType("boolean");
-
-                    b.Property<short>("RemainGb")
+                    b.Property<short>("ReaminGb")
                         .HasColumnType("smallint");
 
                     b.Property<short>("RemainMin")
@@ -94,15 +90,6 @@ namespace ServiceAbonents.Migrations
 
                     b.Property<short>("RemainSMS")
                         .HasColumnType("smallint");
-
-                    b.Property<bool>("UnlimMusic")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("UnlimSocials")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("UnlimVideo")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 

@@ -7,8 +7,8 @@ namespace ServiceAbonents.Data
     {
         bool SaveChanges();
         IEnumerable<Remain> GetAllRemains();
-        Remain GetRemainByAbonentId(int id);
+        Remain GetRemainByAbonentId(Guid id);
         void CreateRemain(Remain newRemain);
-        void Update(Remain remain);
+        void Update(Guid clientId, RemainUpdateDto updateRemain);
     }
 }

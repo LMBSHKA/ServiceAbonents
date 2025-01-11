@@ -23,16 +23,16 @@ namespace ServiceAbonents.Data
             _remain = remain;
         }
 
-        public void UpdateTarif(SwitchTarifDto newTarif, int AbonentId)
+        public void UpdateTarif(SwitchTarifDto newTarif, Guid AbonentId)
         {
             if (newTarif == null)
                 throw new ArgumentNullException(nameof(newTarif));
 
-            var abonent = _context.Abonents.FirstOrDefault(x => x.Id == AbonentId);
+            var abonent = _context.Abonents.FirstOrDefault(x => x.Id.Equals(AbonentId));
 
             if (abonent != null)
             {
-                if (newTarif.Tarif != 0)
+                if (!newTarif.Tarif.IsNullOrEmpty())
                 {
                     decimal newTarifCost = 500;
                     abonent.TarifCost = newTarifCost;
@@ -57,10 +57,10 @@ namespace ServiceAbonents.Data
             }
         }
 
-        private decimal GetDiscount(int abonentId, decimal newTarifCost)
+        private decimal GetDiscount(Guid abonentId, decimal newTarifCost)
         {
             var remain = _remain.GetRemainByAbonentId(abonentId);
-            decimal discount = remain.ReaminGb + remain.RemainMin * (decimal)0.05 + remain.RemainSMS * (decimal)0.7;
+            decimal discount = remain.RemainGb + remain.RemainMin * (decimal)0.05 + remain.RemainSMS * (decimal)0.7;
 
             if (discount > newTarifCost * (decimal)0.5)
                 return newTarifCost * (decimal)0.5;
@@ -68,7 +68,7 @@ namespace ServiceAbonents.Data
             return discount;
         }
 
-        public void DebitingSwitchedTarif(int abonentId, decimal tarifCost)
+        public void DebitingSwitchedTarif(Guid abonentId, decimal tarifCost)
         {
             _updateBalance.TopUpAndDebitingBalance(new TopUpDto
             {
@@ -78,15 +78,15 @@ namespace ServiceAbonents.Data
             
             _send.SendMessage(_debiting.SetTransaction(abonentId, tarifCost));
             UpdateDate(abonentId);
-            var abonent = _context.Abonents.FirstOrDefault(x => x.Id == abonentId);
+            var abonent = _context.Abonents.FirstOrDefault(x => x.Id.Equals(abonentId));
             Console.WriteLine("Денег хваатает на балансе");
 
         }
 
-        public void UpdateDate(int abonentId)
+        public void UpdateDate(Guid abonentId)
         {
 
-            var abonent = _context.Abonents.FirstOrDefault(x => x.Id == abonentId);
+            var abonent = _context.Abonents.FirstOrDefault(x => x.Id.Equals(abonentId));
             _context.Entry(abonent).Reload();
             abonent.DateForDeduct = DateTime.Now.AddMonths(1).ToString("dd.MM.yyyy");
             abonent.Status = true;
