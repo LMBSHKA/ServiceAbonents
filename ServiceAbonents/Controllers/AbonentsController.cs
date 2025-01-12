@@ -34,7 +34,7 @@ namespace ServiceAbonents.Controllers
         /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
         /// <response code="500">Ошибка сервера</response>
         [HttpGet]
-        public ActionResult<IEnumerable<AbonentReadDto>> GetAbonents([FromQuery] FilterDto filter,
+        public ActionResult<GetAllAbonentsDto> GetAbonents([FromQuery] FilterDto filter,
             [FromQuery] int page = 1)
         {
             Console.WriteLine("Get Abonents");
@@ -50,7 +50,12 @@ namespace ServiceAbonents.Controllers
 
             var pagedItems = abonentItem.Skip(startIndex).Take(_pageSize).ToList();
 
-            return Ok(_mapper.Map<IEnumerable<AbonentReadDto>>(pagedItems));
+            var map = _mapper.Map<IEnumerable<AbonentReadDto>>(pagedItems);
+
+            if ((double)abonentItem.Count() / _pageSize <= 1)
+                return Ok(new GetAllAbonentsDto { abonentRead = map, PageCount = 1 });
+            return Ok(new GetAllAbonentsDto { abonentRead = map, 
+                PageCount = Math.Ceiling((double)abonentItem.Count() / _pageSize) });
         }
 
         /// <summary>

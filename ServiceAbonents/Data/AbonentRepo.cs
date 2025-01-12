@@ -37,7 +37,7 @@ namespace ServiceAbonents.Data
                 PhoneNumber = newAbonent.PhoneNumber
             };
 
-            _context.Abonents.Update(abonent);
+            _context.Abonents.Add(abonent);
             SaveChange();
             _sender.SendMessage(new IdForCartDto { AbonentId = abonent.Id, TemporaryId = temporaryId });
 
@@ -91,10 +91,10 @@ namespace ServiceAbonents.Data
         public IEnumerable<Abonent> GetAllAbonents(FilterDto filter)
         {
             var abonets = _context.Abonents.Where(p =>
-            EF.Functions.Like(p.Name!, $"%{filter.Name}%") ||
-            EF.Functions.Like(p.Surname!, $"%{filter.Surname}%") ||
-            EF.Functions.Like(p.PhoneNumber!, $"%{filter.PhoneNumber}%") ||
-            EF.Functions.Like(Convert.ToString(p.TariffId)!, $"%{filter.TariffId}%") ||
+            EF.Functions.Like(p.Name!, $"%{filter.Name}%") &
+            EF.Functions.Like(p.Surname!, $"%{filter.Surname}%") &
+            EF.Functions.Like(p.PhoneNumber!, $"%{filter.PhoneNumber}%") &
+            EF.Functions.Like(Convert.ToString(p.TariffId)!, $"%{filter.TariffId}%") &
             EF.Functions.Like(p.Patronymic, $"%{filter.Patronymic}%"));
 
             return abonets.OrderBy(x => x.Id).ToList();
@@ -120,6 +120,12 @@ namespace ServiceAbonents.Data
 
                 if (updateAbonent.Pasport != string.Empty)
                     abonent.Pasport = updateAbonent.Pasport;
+
+                if (updateAbonent.TariffCost != 0)
+                    abonent.TariffCost = updateAbonent.TariffCost;
+
+                if (updateAbonent.Status != null)
+                    abonent.Status = (bool)updateAbonent.Status;
 
                 _context.Update(abonent);
                 _context.SaveChanges();

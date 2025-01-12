@@ -107,9 +107,9 @@ internal class Program
         // Add services to the container.
         builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         builder.Services.AddHostedService<RabbitMqListener>();
-        builder.Services.AddHostedService<RabbitMqListenerCart>();
-        builder.Services.AddHostedService<RabbitMqListenerAuth>();
-        builder.Services.AddHostedService<RabbitMqListenerTarif>();
+        //builder.Services.AddHostedService<RabbitMqListenerCart>();
+        //builder.Services.AddHostedService<RabbitMqListenerAuth>();
+        //builder.Services.AddHostedService<RabbitMqListenerTarif>();
 
         builder.Services.AddScoped<ISwitchTarif, SwitchTarif>();
         builder.Services.AddScoped<ISender, RabbitMqSender>();

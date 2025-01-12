@@ -27,12 +27,12 @@ namespace ServiceAbonents.RabbitMq
             using var connection = await factory.CreateConnectionAsync();
             using var channel = await connection.CreateChannelAsync();
 
-            await channel.ExchangeDeclareAsync(exchange: "OperationWithBalance", type: ExchangeType.Topic);
+            await channel.ExchangeDeclareAsync(exchange: "TransferCart", type: ExchangeType.Topic);
             var queueDeclareResult = await channel.QueueDeclareAsync(durable: true, exclusive: false,
     autoDelete: false, arguments: null);
             await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
             var queueName = queueDeclareResult.QueueName;
-            await channel.QueueBindAsync(queue: queueName, exchange: "OperationWithBalance", routingKey: "secretKey");
+            await channel.QueueBindAsync(queue: queueName, exchange: "TransferCart", routingKey: "secretKeyCart");
 
             var consumer = new AsyncEventingBasicConsumer(channel);
             consumer.ReceivedAsync += (model, ea) =>
