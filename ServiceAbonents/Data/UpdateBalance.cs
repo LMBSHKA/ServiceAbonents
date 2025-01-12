@@ -10,7 +10,7 @@ namespace ServiceAbonents.Data
 {
     public class UpdateBalance : IUpdateBalance
     {
-        private static readonly string connectionString = "Server=tenuously-surprising-sawfish.data-1.use1.tembo.io;Port=5432;Database=AbonentsDb;User Id=postgres;Password=F5OXiaKwQc6V98WQ";
+        private static readonly string connectionString = "Server=localhost;Port=5432;Database=ServiceAbonentsDb;User Id=postgres;Password=admin";
         //"Server=localhost;Port=5432;Database=ServiceAbonentsDb;User Id=postgres;Password=admin";
         //"Server=tenuously-surprising-sawfish.data-1.use1.tembo.io;Port=5432;Database=AbonentsDb;User Id=postgres;Password=F5OXiaKwQc6V98WQ";
 

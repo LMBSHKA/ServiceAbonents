@@ -15,6 +15,5 @@ namespace ServiceAbonents.Dtos
         public string DateForDeduct { get; set; }
         public bool Status { get; set; }
         public decimal TariffCost { get; set; }
-        public int PageCount { get; set; }
     }
 }

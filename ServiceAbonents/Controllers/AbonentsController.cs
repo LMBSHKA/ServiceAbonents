@@ -44,7 +44,7 @@ namespace ServiceAbonents.Controllers
             var abonentItem = _repository.GetAllAbonents(filter);
 
             if (!abonentItem.Any())
-                return NoContent();
+                return Ok();
 
             var startIndex = (page - 1) * _pageSize;
 
