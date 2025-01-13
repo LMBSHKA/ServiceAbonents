@@ -106,7 +106,8 @@ internal class Program
 
         // Add services to the container.
         builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-        builder.Services.AddHostedService<RabbitMqListener>();
+
+        //builder.Services.AddHostedService<RabbitMqListener>();
         //builder.Services.AddHostedService<RabbitMqListenerCart>();
         //builder.Services.AddHostedService<RabbitMqListenerAuth>();
         //builder.Services.AddHostedService<RabbitMqListenerTarif>();
@@ -143,10 +144,6 @@ internal class Program
         }
 
         app.UseCors();
-
-        //PrepDb.PrepPopulation(app);
-
-        //app.UseHttpsRedirection();
 
         app.UseAuthorization();
 
