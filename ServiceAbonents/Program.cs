@@ -31,7 +31,7 @@ internal class Program
             {
                 Version = "v1",
                 Title = "Abonents API",
-                Description = "управление пользоваителями ссылка на сайт - https://serviceabonents-2.onrender.com",
+                Description = "ГіГЇГ°Г ГўГ«ГҐГ­ГЁГҐ ГЇГ®Г«ГјГ§Г®ГўГ ГЁГІГҐГ«ГїГ¬ГЁ Г±Г±Г»Г«ГЄГ  Г­Г  Г±Г Г©ГІ - https://serviceabonents-2.onrender.com",
             });
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -107,10 +107,11 @@ internal class Program
         // Add services to the container.
         builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
-        //builder.Services.AddHostedService<RabbitMqListener>();
-        //builder.Services.AddHostedService<RabbitMqListenerCart>();
-        //builder.Services.AddHostedService<RabbitMqListenerAuth>();
-        //builder.Services.AddHostedService<RabbitMqListenerTarif>();
+        builder.Services.AddHostedService<RabbitMqListener>();
+        builder.Services.AddHostedService<RabbitMqListenerCart>();
+        builder.Services.AddHostedService<RabbitMqListenerAuth>();
+        builder.Services.AddHostedService<RabbitMqListenerTarif>();
+
 
         builder.Services.AddScoped<ISwitchTarif, SwitchTarif>();
         builder.Services.AddScoped<ISender, RabbitMqSender>();
@@ -171,7 +172,7 @@ public class DatabaseCleaner
 
         using var context = serviceProvider.GetRequiredService<AppDbContext>();
 
-        // Удаляем существующую базу данных (если есть)
+        // Г“Г¤Г Г«ГїГҐГ¬ Г±ГіГ№ГҐГ±ГІГўГіГѕГ№ГіГѕ ГЎГ Г§Гі Г¤Г Г­Г­Г»Гµ (ГҐГ±Г«ГЁ ГҐГ±ГІГј)
         context.Database.EnsureDeleted();
     }
 }
