@@ -33,10 +33,11 @@ namespace ServiceAbonents.Data
                 Name = newAbonent.Name,
                 Surname = newAbonent.Surname,
                 Patronymic = newAbonent.Patronymic,
-                PasportData = newAbonent.PasportData,
+                Pasport = newAbonent.Pasport,
+                PhoneNumber = newAbonent.PhoneNumber
             };
 
-            _context.Abonents.Update(abonent);
+            _context.Abonents.Add(abonent);
             SaveChange();
             _sender.SendMessage(new IdForCartDto { AbonentId = abonent.Id, TemporaryId = temporaryId });
 
@@ -49,37 +50,37 @@ namespace ServiceAbonents.Data
             var newAbonent = new Abonent
             {
                 Id = new Guid(),
-                TarrifId = update.TarifId,
+                TariffId = update.TariffId,
                 PhoneNumber = update.PhoneNumber,
                 Name = abonent.Name,
                 Surname = abonent.Surname,
                 Patronymic = abonent.Patronymic,
-                PasportData = abonent.PasportData,
-                TarifCost = update.TarifCost
+                Pasport = abonent.Pasport,
+                TariffCost = update.TariffCost
             };
 
             _context.Add(newAbonent);
             _context.SaveChanges();
 
-            if (update.TarifId.Length > 2)
+            if (update.TariffId.Length > 2)
             {
-                var splitTarif = update.TarifId.Split('-');
+                var splitTariff = update.TariffId.Split('-');
                 var remain = new Remain {
                     ClientId = newAbonent.Id,
-                    RemainGb = short.Parse(splitTarif[0]),
-                    RemainMin = short.Parse(splitTarif[1]),
-                    RemainSMS = short.Parse(splitTarif[2]),
-                    UnlimVideo = bool.Parse(splitTarif[3]),
-                    UnlimSocials = bool.Parse(splitTarif[4]),
-                    UnlimMusic = bool.Parse(splitTarif[5]),
-                    LongDistanceCall = bool.Parse(splitTarif[6])
+                    RemainGb = short.Parse(splitTariff[0]),
+                    RemainMin = short.Parse(splitTariff[1]),
+                    RemainSMS = short.Parse(splitTariff[2]),
+                    UnlimVideo = bool.Parse(splitTariff[3]),
+                    UnlimSocials = bool.Parse(splitTariff[4]),
+                    UnlimMusic = bool.Parse(splitTariff[5]),
+                    LongDistanceCall = bool.Parse(splitTariff[6])
                 };
 
                 _remain.CreateRemain(remain);
             }
 
             else
-                _sender.SendMessage(new IdForTarifDto { AbonentId = newAbonent.Id, TarifId = newAbonent.TarrifId });
+                _sender.SendMessage(new IdForTarifDto { AbonentId = newAbonent.Id, TariffId = newAbonent.TariffId });
         }
 
         public Abonent GetAbonentById(Guid id)
@@ -90,10 +91,10 @@ namespace ServiceAbonents.Data
         public IEnumerable<Abonent> GetAllAbonents(FilterDto filter)
         {
             var abonets = _context.Abonents.Where(p =>
-            EF.Functions.Like(p.Name!, $"%{filter.Name}%") ||
-            EF.Functions.Like(p.Surname!, $"%{filter.Surname}%") ||
-            EF.Functions.Like(p.PhoneNumber!, $"%{filter.PhoneNumber}%") ||
-            EF.Functions.Like(Convert.ToString(p.TarrifId)!, $"%{filter.TarifId}%") ||
+            EF.Functions.Like(p.Name!, $"%{filter.Name}%") &
+            EF.Functions.Like(p.Surname!, $"%{filter.Surname}%") &
+            EF.Functions.Like(p.PhoneNumber!, $"%{filter.PhoneNumber}%") &
+            EF.Functions.Like(Convert.ToString(p.TariffId)!, $"%{filter.TariffId}%") &
             EF.Functions.Like(p.Patronymic, $"%{filter.Patronymic}%"));
 
             return abonets.OrderBy(x => x.Id).ToList();
@@ -117,8 +118,14 @@ namespace ServiceAbonents.Data
                 if (updateAbonent.Patronymic != string.Empty)
                     abonent.Patronymic = updateAbonent.Patronymic;
 
-                if (updateAbonent.PasportData != string.Empty)
-                    abonent.PasportData = updateAbonent.PasportData;
+                if (updateAbonent.Pasport != string.Empty)
+                    abonent.Pasport = updateAbonent.Pasport;
+
+                if (updateAbonent.TariffCost != 0)
+                    abonent.TariffCost = updateAbonent.TariffCost;
+
+                if (updateAbonent.Status != null)
+                    abonent.Status = (bool)updateAbonent.Status;
 
                 _context.Update(abonent);
                 _context.SaveChanges();
@@ -132,13 +139,13 @@ namespace ServiceAbonents.Data
 
             var abonent = GetAbonentById(id);
 
-            abonent.TarrifId = newAbonent.TarifId;
+            abonent.TariffId = newAbonent.TariffId;
             abonent.PhoneNumber = newAbonent.PhoneNumber;
-            abonent.TarifCost = newAbonent.TarifCost;
+            abonent.TariffCost = newAbonent.TariffCost;
 
-            if (newAbonent.TarifId.Length > 2)
+            if (newAbonent.TariffId.Length > 2)
             {
-                var splitTarif = newAbonent.TarifId.Split('-');
+                var splitTarif = newAbonent.TariffId.Split('-');
                 var newRemain = new RemainUpdateDto {
                     RemainGb = short.Parse(splitTarif[0]),
                     RemainMin = short.Parse(splitTarif[1]),

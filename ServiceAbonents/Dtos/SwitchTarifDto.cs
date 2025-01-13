@@ -5,6 +5,6 @@ namespace ServiceAbonents.Dtos
     public class SwitchTarifDto
     {
         [Required]
-        public string Tarif { get; set; }
+        public string Tariff { get; set; }
     }
 }

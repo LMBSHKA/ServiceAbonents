@@ -9,7 +9,7 @@ namespace ServiceAbonents.Models
         [Required]
         public Guid Id { get; set; }
         [Required]
-        public string TarrifId { get; set; } = string.Empty;
+        public string TariffId { get; set; } = string.Empty;
         [Required]
         public string Name { get; set; }
         [Required]
@@ -19,14 +19,14 @@ namespace ServiceAbonents.Models
         [Required]
         public string PhoneNumber { get; set; } = string.Empty;
         [Required]
-        public string PasportData { get; set; }
+        public string Pasport { get; set; }
         [Required]
         public decimal Balance { get; set; } = 0;
         public string DateForDeduct { get; set; } = string.Empty;
         [Required]
         public bool Status { get; set; } = false;
         [Required]
-        public decimal TarifCost { get; set; } = 0;
+        public decimal TariffCost { get; set; } = 0;
         [Required]
         public string Role { get; set; } = "User";
     }

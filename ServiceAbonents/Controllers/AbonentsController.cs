@@ -25,18 +25,16 @@ namespace ServiceAbonents.Controllers
             _switch = switchTarif;
         }
 
-        //[Authorize]
         /// <summary>
-        /// Получение всех пользователей
-        /// Фильтрация происходит по ФИО, номеру телефона, Id-тарифа
+        /// Получение всех пользователей, есть фильтрация и пагинация
         /// </summary>
-        /// <param name="model">абонента</param>
+        /// <param name="filter">абонента</param>
         /// <returns></returns>
         /// <response code="200">Успешное выполнение</response>
         /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
         /// <response code="500">Ошибка сервера</response>
         [HttpGet]
-        public ActionResult<IEnumerable<AbonentReadDto>> GetAbonents([FromQuery] FilterDto filter,
+        public ActionResult<GetAllAbonentsDto> GetAbonents([FromQuery] FilterDto filter,
             [FromQuery] int page = 1)
         {
             Console.WriteLine("Get Abonents");
@@ -45,22 +43,25 @@ namespace ServiceAbonents.Controllers
 
             var abonentItem = _repository.GetAllAbonents(filter);
 
-            if (!abonentItem.Any())
-                return NoContent();
+            //if (!abonentItem.Any())
+            //    return Ok();
 
             var startIndex = (page - 1) * _pageSize;
 
             var pagedItems = abonentItem.Skip(startIndex).Take(_pageSize).ToList();
 
-            return Ok(_mapper.Map<IEnumerable<AbonentReadDto>>(pagedItems));
+            var map = _mapper.Map<IEnumerable<AbonentReadDto>>(pagedItems);
+
+            if ((double)abonentItem.Count() / _pageSize <= 1)
+                return Ok(new GetAllAbonentsDto { abonentRead = map, PageCount = 1 });
+            return Ok(new GetAllAbonentsDto { abonentRead = map, 
+                PageCount = Math.Ceiling((double)abonentItem.Count() / _pageSize) });
         }
 
-        //[Authorize]
         /// <summary>
-        /// Получение всех пользователей
-        /// Фильтрация происходит по ФИО, номеру телефона, Id-тарифа
+        /// Получение пользователя по id
         /// </summary>
-        /// <param name="model">абонента</param>
+        /// <param name="id">абонента</param>
         /// <returns></returns>
         /// <response code="200">Успешное выполнение</response>
         /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
@@ -77,6 +78,15 @@ namespace ServiceAbonents.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Создание абонента
+        /// </summary>
+        /// <param name="newAbonent"></param>
+        /// <param name="temporaryId"></param>
+        /// <returns></returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
+        /// <response code="500">Ошибка сервера</response>
         [HttpPost]
         public ActionResult<AbonentCreateDto> CreateAbonent(AbonentCreateDto newAbonent, Guid temporaryId)
         {
@@ -90,7 +100,15 @@ namespace ServiceAbonents.Controllers
             return Ok();
         }
 
-        //[Authorize]
+        /// <summary>
+        /// Обновление данных абонента
+        /// </summary>
+        /// <param name="id">абонента</param>
+        /// <param name="updateAbonent"></param>
+        /// <returns></returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
+        /// <response code="500">Ошибка сервера</response>
         [HttpPut]
         public ActionResult UpdatePut(Guid id, AbonentsUpdateDto updateAbonent)
         {
@@ -98,7 +116,15 @@ namespace ServiceAbonents.Controllers
             return Ok();
         }
 
-        //[Authorize]
+        /// <summary>
+        /// обновление тарифа абонента
+        /// </summary>
+        /// <param name="abonentId"></param>
+        /// <param name="newTarif"></param>
+        /// <returns></returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
+        /// <response code="500">Ошибка сервера</response>
         [HttpPut("SwitchTarif")]
         public ActionResult SwitchTarif(Guid abonentId, SwitchTarifDto newTarif)
         {

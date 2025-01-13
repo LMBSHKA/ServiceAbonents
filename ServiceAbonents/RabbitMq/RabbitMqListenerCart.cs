@@ -14,6 +14,8 @@ namespace ServiceAbonents.RabbitMq
     {
         private static readonly Uri _uri = new Uri("amqps://akmeanzg:TMOCQxQAEWZjfE0Y7wH5v0TN_XTQ9Xfv@mouse.rmq5.cloudamqp.com/akmeanzg");
         private readonly IServiceScopeFactory _scopeFactory;
+        private IConnection _connection;
+        private IChannel _channel;
 
         public RabbitMqListenerCart(IServiceScopeFactory scopeFactory)
         {
@@ -24,17 +26,17 @@ namespace ServiceAbonents.RabbitMq
         {
             stoppingToken.ThrowIfCancellationRequested();
             var factory = new ConnectionFactory { Uri = _uri };
-            using var connection = await factory.CreateConnectionAsync();
-            using var channel = await connection.CreateChannelAsync();
+            _connection = await factory.CreateConnectionAsync();
+            _channel = await _connection.CreateChannelAsync();
 
-            await channel.ExchangeDeclareAsync(exchange: "OperationWithBalance", type: ExchangeType.Topic);
-            var queueDeclareResult = await channel.QueueDeclareAsync(durable: true, exclusive: false,
+            await _channel.ExchangeDeclareAsync(exchange: "TransferCart", type: ExchangeType.Topic);
+            var queueDeclareResult = await _channel.QueueDeclareAsync(durable: true, exclusive: false,
     autoDelete: false, arguments: null);
-            await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
+            await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
             var queueName = queueDeclareResult.QueueName;
-            await channel.QueueBindAsync(queue: queueName, exchange: "OperationWithBalance", routingKey: "secretKey");
+            await _channel.QueueBindAsync(queue: queueName, exchange: "TransferCart", routingKey: "secretKeyCart");
 
-            var consumer = new AsyncEventingBasicConsumer(channel);
+            var consumer = new AsyncEventingBasicConsumer(_channel);
             consumer.ReceivedAsync += (model, ea) =>
             {
                 var body = ea.Body.ToArray();
@@ -47,7 +49,7 @@ namespace ServiceAbonents.RabbitMq
                 return Task.CompletedTask;
 
             };
-            await channel.BasicConsumeAsync(queueName, autoAck: false, consumer: consumer);
+            await _channel.BasicConsumeAsync(queueName, autoAck: false, consumer: consumer);
 
             Console.ReadLine();
         }
@@ -72,10 +74,10 @@ namespace ServiceAbonents.RabbitMq
 
                     debiting.AddNewAbonent(new DebitingAbonentDto
                     {
-                        TarrifId = dataAbonents[i].TarifId,
+                        TariffId = dataAbonents[i].TariffId,
                         Id = dataAbonents[i].AbonentId,
                         Balance = 0,
-                        TarifCost = dataAbonents[i].TarifCost
+                        TariffCost = dataAbonents[i].TariffCost
                     });
                 }
             }
@@ -85,7 +87,7 @@ namespace ServiceAbonents.RabbitMq
         {
             return new UpdateNewAbonentDto
             {
-                TarifId = data.TarifId,
+                TariffId = data.TariffId,
                 PhoneNumber = data.PhoneNumber
             };
         }

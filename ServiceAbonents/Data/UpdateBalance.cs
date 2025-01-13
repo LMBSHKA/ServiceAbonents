@@ -11,6 +11,8 @@ namespace ServiceAbonents.Data
     public class UpdateBalance : IUpdateBalance
     {
         private static readonly string connectionString = "Server=tenuously-surprising-sawfish.data-1.use1.tembo.io;Port=5432;Database=AbonentsDb;User Id=postgres;Password=F5OXiaKwQc6V98WQ";
+        //"Server=localhost;Port=5432;Database=ServiceAbonentsDb;User Id=postgres;Password=admin";
+        //"Server=tenuously-surprising-sawfish.data-1.use1.tembo.io;Port=5432;Database=AbonentsDb;User Id=postgres;Password=F5OXiaKwQc6V98WQ";
 
         public bool TopUpAndDebitingBalance(TopUpDto newBalance)
         {
@@ -27,7 +29,8 @@ namespace ServiceAbonents.Data
             {
                 try
                 {
-                    var abonent = context.Abonents.FirstOrDefault(x => x.Id.Equals(newBalance.ClientId));
+                    var all = context.Abonents.ToList();
+                    var abonent = context.Abonents.FirstOrDefault(x => x.Id == newBalance.ClientId);
 
                     abonent.Balance = abonent.Balance + newBalance.Amount;
                     context.Update(abonent);

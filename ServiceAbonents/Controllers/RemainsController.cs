@@ -18,14 +18,29 @@ namespace ServiceAbonents.Controllers
 			_repository = repo;
 		}
 
-		[HttpGet]
+        /// <summary>
+        /// Получение остатков всех пользователей
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
+        /// <response code="500">Ошибка сервера</response>
+        [HttpGet]
 		public ActionResult<IEnumerable<RemainReadDto>> GetRemain()
 		{
 			var remainItem = _repository.GetAllRemains();
 			return Ok(_mapper.Map<IEnumerable<RemainReadDto>>(remainItem));
 		}
-		
-		[HttpGet("{id}")]
+
+        /// <summary>
+        /// Получение остатков пользователя по его id
+        /// </summary>
+        /// <param name="id">абонента</param>
+        /// <returns></returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
+        /// <response code="500">Ошибка сервера</response>
+        [HttpGet("{id}")]
 		public ActionResult<RemainReadDto> GetRemainByAbonentId(Guid id)
 		{
 			var remainItem = _repository.GetRemainByAbonentId(id);
@@ -34,7 +49,16 @@ namespace ServiceAbonents.Controllers
             return NotFound();
 		}
 
-		[HttpPut]
+        /// <summary>
+        /// Обновление остатков пользователя
+        /// </summary>
+        /// <param name="clientId">абонента</param>
+        /// <param name="updateRemain">абонента</param>
+        /// <returns></returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
+        /// <response code="500">Ошибка сервера</response>
+        [HttpPut]
 		public ActionResult UpdatePut (Guid clientId, RemainUpdateDto updateRemain)
 		{
 			_repository.Update(clientId, updateRemain);
