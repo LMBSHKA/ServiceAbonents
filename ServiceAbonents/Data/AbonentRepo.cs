@@ -183,9 +183,13 @@ namespace ServiceAbonents.Data
         }
 
         public TransferForAuthDto GetAbonentByPhoneNumber(string phoneNumber)
-        {
+        { 
+            
             var abonent = _context.Abonents.FirstOrDefault(x => x.PhoneNumber == phoneNumber);
-
+            if (abonent == null)
+            {
+                throw new KeyNotFoundException("Пользователь не найден");
+            }
             return new TransferForAuthDto
             {
                 AbonentId = abonent.Id.ToString(),
