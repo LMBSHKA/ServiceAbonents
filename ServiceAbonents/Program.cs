@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Autofac.Core;
 using MassTransit;
+using ServiceAbonents.Dtos;
 
 internal class Program
 {
@@ -25,6 +26,7 @@ internal class Program
                        .AllowCredentials();
             });
         });
+
         builder.Services.AddMassTransit(x =>
         {
             x.SetKebabCaseEndpointNameFormatter();
@@ -38,6 +40,7 @@ internal class Program
                     x.ConfigureConsumer<RabbitMqListenerAuth>(context);
                     x.Bind("exchange-name");
                 });
+                cfg.Message<IdForCartDto> (x => x.SetEntityName("Cart"));
 
                 cfg.ClearSerialization();
                 cfg.UseRawJsonSerializer();
@@ -125,9 +128,6 @@ internal class Program
         builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
         builder.Services.AddHostedService<RabbitMqListener>();
-        builder.Services.AddHostedService<RabbitMqListenerCart>();
-        builder.Services.AddHostedService<RabbitMqListenerTarif>();
-
 
         builder.Services.AddScoped<ISwitchTarif, SwitchTarif>();
         builder.Services.AddScoped<ISender, RabbitMqSender>();

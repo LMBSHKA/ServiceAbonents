@@ -90,12 +90,7 @@ namespace ServiceAbonents.Controllers
         [HttpPost]
         public ActionResult<AbonentCreateDto> CreateAbonent(AbonentCreateDto newAbonent, Guid temporaryId)
         {
-            var abonent = _repository.CreateAbonent(newAbonent, temporaryId);
-            var abonentReadDto = _mapper.Map<AbonentReadDto>(abonent);
-            var remain = new Remain { ClientId = abonentReadDto.Id, };
-
-            _remainRepository.CreateRemain(remain);
-            _remainRepository.SaveChanges();
+            _repository.CreateAbonent(newAbonent, temporaryId);
 
             return Ok();
         }

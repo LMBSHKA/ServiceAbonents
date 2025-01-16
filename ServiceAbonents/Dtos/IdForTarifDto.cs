@@ -2,7 +2,6 @@
 {
     public class IdForTarifDto
     {
-        public Guid AbonentId { get; set; }
         public string TariffId { get; set; }
     }
 }

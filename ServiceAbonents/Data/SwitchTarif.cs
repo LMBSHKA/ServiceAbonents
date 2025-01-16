@@ -25,7 +25,7 @@ namespace ServiceAbonents.Data
             _remain = remain;
         }
 
-        public void UpdateTarif(SwitchTarifDto dynamicTarif, Guid abonentId, string staticTariff, decimal tariffCost)
+        public async void UpdateTarif(SwitchTarifDto dynamicTarif, Guid abonentId, string staticTariff, decimal tariffCost)
         {
             var abonent = _context.Abonents.FirstOrDefault(x => x.Id == abonentId);
 
@@ -58,8 +58,7 @@ namespace ServiceAbonents.Data
                     {
                         Id = abonent.Id,
                         TariffCost = tariffCost,
-                        Balance = abonent.Balance,
-                        TariffId = tariffId
+                        Balance = abonent.Balance
                     });
             }
         }

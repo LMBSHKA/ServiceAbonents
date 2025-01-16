@@ -34,7 +34,6 @@ namespace ServiceAbonents.Debiting
                         {
                             Id = e.Id,
                             Balance = e.Balance,
-                            TariffId = e.TariffId,
                             TariffCost = e.TariffCost
                         });
 
