@@ -2,6 +2,7 @@
 {
     public class TarrifDto
     {
+        public string TariffName { get; set; }
         public short RemainGb { get; set; }
         public short RemainMin { get; set; }
         public short RemainSMS { get; set; }

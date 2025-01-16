@@ -69,6 +69,10 @@ namespace ServiceAbonents.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("TariffName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("Abonents");

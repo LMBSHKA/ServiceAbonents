@@ -10,7 +10,7 @@ namespace ServiceAbonents.Data
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
         {
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
         }
     }
 }

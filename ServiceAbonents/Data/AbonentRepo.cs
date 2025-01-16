@@ -45,6 +45,7 @@ namespace ServiceAbonents.Data
                     PhoneNumber = dataAbonent.PhoneNumber,
                     TariffId = dataAbonent.TariffId,
                     TariffCost = dataAbonent.TariffCost,
+                    TariffName = dataAbonent.dataTariff.TariffName
                 };
                 _context.Abonents.Add(abonent);
                 SaveChange();

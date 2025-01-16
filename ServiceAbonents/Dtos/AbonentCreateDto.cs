@@ -12,7 +12,5 @@ namespace ServiceAbonents.Dtos
         public string Patronymic { get; set; }
         [Required]
         public string Pasport { get; set; }
-        [Required]
-        public string PhoneNumber { get; set; }
     }
 }

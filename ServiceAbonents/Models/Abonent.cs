@@ -10,6 +10,7 @@ namespace ServiceAbonents.Models
         public Guid Id { get; set; }
         [Required]
         public string TariffId { get; set; } = string.Empty;
+        public string TariffName { get; set; } = string.Empty;
         [Required]
         public string Name { get; set; }
         [Required]
