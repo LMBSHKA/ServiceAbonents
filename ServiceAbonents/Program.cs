@@ -109,10 +109,6 @@ internal class Program
             opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
         });
 
-        //DB cleaner
-        var cleaner = new DatabaseCleaner(builder.Configuration.GetConnectionString("DefaultConnection"));
-        cleaner.ClearDatabase();
-
         // build quartz
         builder.Services.AddQuartz(q =>
         {
@@ -172,27 +168,5 @@ internal class Program
 
         app.Run();
         
-    }
-}
-
-
-public class DatabaseCleaner
-{
-    private readonly string _connectionString;
-
-    public DatabaseCleaner(string connectionString)
-    {
-        _connectionString = connectionString;
-    }
-    public void ClearDatabase()
-    {
-        var serviceProvider = new ServiceCollection()
-           .AddDbContext<AppDbContext>(options => options.UseNpgsql(_connectionString))
-           .BuildServiceProvider();
-
-        using var context = serviceProvider.GetRequiredService<AppDbContext>();
-
-        // Óäàëÿåì ñóùåñòâóþùóþ áàçó äàííûõ (åñëè åñòü)
-        context.Database.EnsureDeleted();
     }
 }
