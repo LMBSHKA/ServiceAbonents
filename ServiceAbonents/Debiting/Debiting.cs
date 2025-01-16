@@ -27,7 +27,17 @@ namespace ServiceAbonents.Debiting
 
         public void AddNewAbonent(DebitingAbonentDto abonent) => _newAbonents.Add(abonent);
 
-        public void AddOldAbonent(DebitingAbonentDto abonent) => _oldAbonents.Add(abonent);
+        public void AddOldAbonent(DebitingAbonentDto abonent)
+        {
+            if (FindOldAbonent(abonent.Id) == null)
+                _oldAbonents.Add(abonent);
+
+            else
+                UpdateOldAbonent(abonent);
+
+            if (FindNewAbonent(abonent.Id) != null)
+                _newAbonents.Remove(abonent);
+        }
 
         public void UpdateOldAbonent(DebitingAbonentDto abonent)
         {

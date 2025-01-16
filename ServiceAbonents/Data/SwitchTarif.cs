@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ServiceAbonents.Debiting;
 using ServiceAbonents.Dtos;
+using ServiceAbonents.Models;
 using ServiceAbonents.RabbitMq;
+using System.Data;
 
 namespace ServiceAbonents.Data
 {
@@ -23,37 +25,42 @@ namespace ServiceAbonents.Data
             _remain = remain;
         }
 
-        public void UpdateTarif(SwitchTarifDto newTarif, Guid AbonentId)
+        public void UpdateTarif(SwitchTarifDto dynamicTarif, Guid abonentId, string staticTariff, decimal tariffCost)
         {
-            if (newTarif == null)
-                throw new ArgumentNullException(nameof(newTarif));
-
-            var abonent = _context.Abonents.FirstOrDefault(x => x.Id.Equals(AbonentId));
+            var abonent = _context.Abonents.FirstOrDefault(x => x.Id == abonentId);
 
             if (abonent != null)
             {
-                if (!newTarif.Tariff.IsNullOrEmpty())
-                {
-                    decimal newTarifCost = 500;
-                    abonent.TariffCost = newTarifCost;
-                    abonent.TariffId = newTarif.Tariff;
-                    _context.Update(abonent);
-                    _context.SaveChanges();
+                var tariffId = staticTariff;
+                var costWithDiscount = tariffCost - GetDiscount(abonent.Id, tariffCost);
 
-                    var costWithDiscoint = newTarifCost - GetDiscount(abonent.Id, newTarifCost);
+                if (dynamicTarif.Minutes != null)
+                    tariffId = $"" +
+                        $"{dynamicTarif.Gigabytes}-" +
+                        $"{dynamicTarif.Minutes}-" +
+                        $"{dynamicTarif.Sms}-" +
+                        $"{dynamicTarif.UnlimVideo}-" +
+                        $"{dynamicTarif.UnlimSocials}-" +
+                        $"{dynamicTarif.UnlimMusic}-" +
+                        $"{dynamicTarif.LongDistanceCall}";
 
-                    if (abonent.Balance >= costWithDiscoint)
-                        DebitingSwitchedTarif(abonent.Id, costWithDiscoint);
+                abonent.TariffId = tariffId;
+                abonent.TariffCost = tariffCost;
 
-                    else
-                        _debiting.AddOldAbonent(new DebitingAbonentDto
-                        {
-                            Id = abonent.Id,
-                            TariffCost = newTarifCost,
-                            Balance = abonent.Balance,
-                            TariffId = newTarif.Tariff
-                        });
-                }
+                _context.Update(abonent);
+                _context.SaveChanges();
+
+                if (abonent.Balance >= costWithDiscount)
+                    DebitingSwitchedTarif(abonent.Id, costWithDiscount);
+
+                else
+                    _debiting.AddOldAbonent(new DebitingAbonentDto
+                    {
+                        Id = abonent.Id,
+                        TariffCost = tariffCost,
+                        Balance = abonent.Balance,
+                        TariffId = tariffId
+                    });
             }
         }
 
@@ -78,7 +85,6 @@ namespace ServiceAbonents.Data
             
             _send.SendMessage(_debiting.SetTransaction(abonentId, tarifCost));
             UpdateDate(abonentId);
-            var abonent = _context.Abonents.FirstOrDefault(x => x.Id.Equals(abonentId));
             Console.WriteLine("Денег хваатает на балансе");
 
         }

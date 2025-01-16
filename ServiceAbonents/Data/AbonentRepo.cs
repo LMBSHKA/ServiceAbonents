@@ -62,6 +62,14 @@ namespace ServiceAbonents.Data
             _context.Add(newAbonent);
             _context.SaveChanges();
 
+            _debiting.AddNewAbonent(new DebitingAbonentDto
+            {
+                Id = newAbonent.Id,
+                TariffId = newAbonent.TariffId,
+                Balance = newAbonent.Balance,
+                TariffCost = newAbonent.TariffCost
+            });
+
             if (update.TariffId.Length > 2)
             {
                 var splitTariff = update.TariffId.Split('-');
@@ -160,6 +168,13 @@ namespace ServiceAbonents.Data
 
             _context.Update(abonent);
             _context.SaveChanges();
+
+            _debiting.AddNewAbonent(new DebitingAbonentDto { 
+                Id = abonent.Id,
+                TariffId = newAbonent.TariffId,
+                Balance = abonent.Balance,
+                TariffCost = newAbonent.TariffCost
+            });
         }
 
         public bool SaveChange()
@@ -171,7 +186,7 @@ namespace ServiceAbonents.Data
         {
             var abonent = _context.Abonents.FirstOrDefault(x => x.PhoneNumber == phoneNumber);
 
-            _sender.SendMessage(new TransferForAuthDto 
+            _sender.SendMessage(new TransferForAuthDto
             {
                 AbonentId = abonent.Id,
                 PhoneNumber = abonent.PhoneNumber,

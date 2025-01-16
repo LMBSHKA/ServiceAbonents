@@ -28,7 +28,7 @@ namespace ServiceAbonents.RabbitMq
 
             await _channel.ExchangeDeclareAsync(exchange: "TransferAuth", type: ExchangeType.Topic);
             var queueDeclareResult = await _channel.QueueDeclareAsync(durable: true, exclusive: false,
-    autoDelete: false, arguments: null);
+    autoDelete: false, arguments: null, queue: "Auth");
             await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
             var queueName = queueDeclareResult.QueueName;
             await _channel.QueueBindAsync(queue: queueName, exchange: "TransferAuth", routingKey: "secretKeyAuth");
@@ -46,8 +46,9 @@ namespace ServiceAbonents.RabbitMq
                     var repo = scope.ServiceProvider.GetRequiredService<IAbonentRepo>();
                     repo.GetAbonentByPhoneNumber(phoneNumber);
                 }
-                    return Task.CompletedTask;
+                _channel.BasicAckAsync(ea.DeliveryTag, false);
 
+                return Task.CompletedTask;
             };
             await _channel.BasicConsumeAsync(queueName, autoAck: false, consumer: consumer);
 

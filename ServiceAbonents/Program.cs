@@ -31,7 +31,7 @@ internal class Program
             {
                 Version = "v1",
                 Title = "Abonents API",
-                Description = "óïðàâëåíèå ïîëüçîâàèòåëÿìè ññûëêà íà ñàéò - https://serviceabonents-2.onrender.com",
+                Description = "управление пользоваителями ссылка на сайт - https://serviceabonents-2.onrender.com",
             });
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

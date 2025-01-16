@@ -29,14 +29,13 @@ namespace ServiceAbonents.Debiting
             {
                 if (e.DateForDeduct == DateTime.Now.ToString("dd.MM.yyyy"))
                 {
-                    var tarifCost = 500;
-
-                    if (tarifCost > e.Balance)
+                    if (e.TariffCost > e.Balance)
                         _debiting.AddOldAbonent(new Dtos.DebitingAbonentDto
                         {
                             Id = e.Id,
                             Balance = e.Balance,
-                            TariffId = e.TariffId
+                            TariffId = e.TariffId,
+                            TariffCost = e.TariffCost
                         });
 
                     else
@@ -44,9 +43,9 @@ namespace ServiceAbonents.Debiting
                         _updateBalance.TopUpAndDebitingBalance(new Dtos.TopUpDto
                         {
                             ClientId = e.Id,
-                            Amount = -tarifCost
+                            Amount = -e.TariffCost
                         });
-                        _sender.SendMessage(_debiting.SetTransaction(e.Id, tarifCost));
+                        _sender.SendMessage(_debiting.SetTransaction(e.Id, e.TariffCost));
                         _debiting.UpdateDate(e.Id);
                     }
                 }

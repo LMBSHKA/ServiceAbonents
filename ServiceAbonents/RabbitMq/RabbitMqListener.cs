@@ -32,7 +32,7 @@ namespace ServiceAbonents.RabbitMq
 
             await _channel.ExchangeDeclareAsync(exchange: "OperationWithBalance", type: ExchangeType.Topic);
             var queueDeclareResult = await _channel.QueueDeclareAsync(durable: true, exclusive: false,
-    autoDelete: false, arguments: null);
+    autoDelete: false, arguments: null, queue: "transaction");
             await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
             var queueName = queueDeclareResult.QueueName;
             await _channel.QueueBindAsync(queue: queueName, exchange: "OperationWithBalance", routingKey: "secretKey");

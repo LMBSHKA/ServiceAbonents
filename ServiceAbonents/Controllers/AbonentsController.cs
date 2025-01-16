@@ -121,14 +121,15 @@ namespace ServiceAbonents.Controllers
         /// </summary>
         /// <param name="abonentId"></param>
         /// <param name="newTarif"></param>
+        /// <param name="tarifId"></param>
         /// <returns></returns>
         /// <response code="200">Успешное выполнение</response>
         /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
         /// <response code="500">Ошибка сервера</response>
         [HttpPut("SwitchTarif")]
-        public ActionResult SwitchTarif(Guid abonentId, SwitchTarifDto newTarif)
+        public ActionResult SwitchTarif(Guid abonentId, SwitchTarifDto newTariff, string tariffId, decimal tariffCost)
         {
-            _switch.UpdateTarif(newTarif, abonentId);
+            _switch.UpdateTarif(newTariff, abonentId, tariffId, tariffCost);
             return Ok();
         }
     }
