@@ -4,55 +4,45 @@ using System.Text.Json;
 using System.Diagnostics;
 using System.Text;
 using ServiceAbonents.Data;
+using MassTransit;
+using ServiceAbonents.Dtos;
 
 namespace ServiceAbonents.RabbitMq
 {
-    public class RabbitMqListenerAuth : BackgroundService
+    public class RabbitMqListenerAuth : IConsumer<TransferForAuthRequestDTO>
     {
-        private static readonly Uri _uri = new Uri("amqps://akmeanzg:TMOCQxQAEWZjfE0Y7wH5v0TN_XTQ9Xfv@mouse.rmq5.cloudamqp.com/akmeanzg");
-        private readonly IServiceScopeFactory _scopeFactory;
-        private IConnection _connection;
-        private IChannel _channel;
+        private readonly IAbonentRepo _abonentRepo;
 
-        public RabbitMqListenerAuth(IServiceScopeFactory scopeFactory)
+        public RabbitMqListenerAuth(IAbonentRepo abonentRepo)
         {
-            _scopeFactory = scopeFactory;
+            _abonentRepo = abonentRepo;
         }
 
-        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+        public async Task Consume(ConsumeContext<TransferForAuthRequestDTO> context)
         {
-            stoppingToken.ThrowIfCancellationRequested();
-            var factory = new ConnectionFactory { Uri = _uri };
-            _connection = await factory.CreateConnectionAsync();
-            _channel = await _connection.CreateChannelAsync();
+            var phoneNumber = context.Message.PhoneNumber;
 
-            await _channel.ExchangeDeclareAsync(exchange: "TransferAuth", type: ExchangeType.Topic);
-            var queueDeclareResult = await _channel.QueueDeclareAsync(durable: true, exclusive: false,
-    autoDelete: false, arguments: null, queue: "Auth");
-            await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
-            var queueName = queueDeclareResult.QueueName;
-            await _channel.QueueBindAsync(queue: queueName, exchange: "TransferAuth", routingKey: "secretKeyAuth");
+            // Ищем пользователя по номеру телефона
+            var user = _abonentRepo.GetAbonentByPhoneNumber(phoneNumber);
 
-            var consumer = new AsyncEventingBasicConsumer(_channel);
-            consumer.ReceivedAsync += (model, ea) =>
+            if (user != null)
             {
-                var body = ea.Body.ToArray();
-                var phoneNumber = JsonSerializer.Deserialize<string>(Encoding.UTF8.GetString(body));
-
-                Console.WriteLine($"[X] Recieved {phoneNumber}");
-                Debug.WriteLine($"Recieved {phoneNumber}");
-                using (var scope = _scopeFactory.CreateAsyncScope())
+                // Если нашли, отправляем UserResponseDTO обратно
+                var userResponse = new TransferForAuthDto
                 {
-                    var repo = scope.ServiceProvider.GetRequiredService<IAbonentRepo>();
-                    repo.GetAbonentByPhoneNumber(phoneNumber);
-                }
-                _channel.BasicAckAsync(ea.DeliveryTag, false);
+                    AbonentId = user.AbonentId,
+                    PhoneNumber = user.PhoneNumber,
+                    Role = user.Role
+                };
 
-                return Task.CompletedTask;
-            };
-            await _channel.BasicConsumeAsync(queueName, autoAck: false, consumer: consumer);
-
-            Console.ReadLine();
+                // Отправляем ответ обратно
+                await context.RespondAsync(userResponse);
+            }
+            else
+            {
+                // Если не нашли, отправляем null или ошибку
+                await context.RespondAsync<TransferForAuthDto>(null);
+            }
         }
     }
 }

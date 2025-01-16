@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Autofac.Core;
+using MassTransit;
 
 internal class Program
 {
@@ -23,6 +24,26 @@ internal class Program
                        .AllowAnyHeader()
                        .AllowCredentials();
             });
+        });
+        builder.Services.AddMassTransit(x =>
+        {
+            x.SetKebabCaseEndpointNameFormatter();
+            x.AddConsumer<RabbitMqListenerAuth>();
+
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.Host("amqps://akmeanzg:TMOCQxQAEWZjfE0Y7wH5v0TN_XTQ9Xfv@mouse.rmq5.cloudamqp.com/akmeanzg");
+                cfg.ReceiveEndpoint("queue-name", x =>
+                {
+                    x.ConfigureConsumer<RabbitMqListenerAuth>(context);
+                    x.Bind("exchange-name");
+                });
+
+                cfg.ClearSerialization();
+                cfg.UseRawJsonSerializer();
+
+            });
+
         });
 
         builder.Services.AddSwaggerGen(options =>
@@ -109,7 +130,6 @@ internal class Program
 
         builder.Services.AddHostedService<RabbitMqListener>();
         builder.Services.AddHostedService<RabbitMqListenerCart>();
-        builder.Services.AddHostedService<RabbitMqListenerAuth>();
         builder.Services.AddHostedService<RabbitMqListenerTarif>();
 
 

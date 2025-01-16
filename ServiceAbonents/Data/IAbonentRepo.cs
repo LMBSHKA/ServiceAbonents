@@ -14,6 +14,6 @@ namespace ServiceAbonents.Data
         void Update(Guid id, AbonentsUpdateDto updateAbonent);
         void UpdateNewAbonent(Guid id, UpdateNewAbonentDto newAbonent);
         void CreateSimilarAbonent(TransferDataAbonentDto newAbonent);
-        void GetAbonentByPhoneNumber(string PhoneNumber);
+        TransferForAuthDto GetAbonentByPhoneNumber(string PhoneNumber);
     }
 }

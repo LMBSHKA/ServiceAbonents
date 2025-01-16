@@ -182,16 +182,16 @@ namespace ServiceAbonents.Data
             return _context.SaveChanges() >= 0;
         }
 
-        public void GetAbonentByPhoneNumber(string phoneNumber)
+        public TransferForAuthDto GetAbonentByPhoneNumber(string phoneNumber)
         {
             var abonent = _context.Abonents.FirstOrDefault(x => x.PhoneNumber == phoneNumber);
 
-            _sender.SendMessage(new TransferForAuthDto
+            return new TransferForAuthDto
             {
-                AbonentId = abonent.Id,
+                AbonentId = abonent.Id.ToString(),
                 PhoneNumber = abonent.PhoneNumber,
                 Role = abonent.Role
-            });
+            };
         }
     }
 }
