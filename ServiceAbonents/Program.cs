@@ -40,7 +40,9 @@ internal class Program
                     x.ConfigureConsumer<RabbitMqListenerAuth>(context);
                     x.Bind("exchange-name");
                 });
+
                 cfg.Message<IdForCartDto> (x => x.SetEntityName("Cart"));
+                cfg.Message<IdForTarifDto>(x => x.SetEntityName("Tariff"));
 
                 cfg.ClearSerialization();
                 cfg.UseRawJsonSerializer();

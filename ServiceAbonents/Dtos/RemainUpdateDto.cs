@@ -2,9 +2,9 @@
 {
     public class RemainUpdateDto
     {
-        public short RemainGb { get; set; } = 0;
-        public short RemainMin { get; set; } = 0;
-        public short RemainSMS { get; set; } = 0;
+        public short? RemainGb { get; set; } = null;
+        public short? RemainMin { get; set; } = null;
+        public short? RemainSMS { get; set; } = null;
         public bool? UnlimVideo { get; set; } = null;
         public bool? UnlimSocials { get; set; } = null;
         public bool? UnlimMusic { get; set; } = null;

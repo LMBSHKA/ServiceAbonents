@@ -12,17 +12,14 @@ namespace ServiceAbonents.Data
     {
         private readonly AppDbContext _context;
         private readonly IDebiting _debiting;
-        private readonly ISender _sender;
         private readonly IRemainRepo _remain;
         private readonly IRequestClient<IdForCartDto> _client;
 
-        public AbonentRepo(AppDbContext context, IDebiting debiting, ISender sender,
-            IRemainRepo remain, IRequestClient<IdForCartDto> client)
+        public AbonentRepo(AppDbContext context, IDebiting debiting, IRemainRepo remain, IRequestClient<IdForCartDto> client)
         {
             _client = client;
             _context = context;
             _debiting = debiting;
-            _sender = sender;
             _remain = remain;
         }
 
@@ -31,7 +28,8 @@ namespace ServiceAbonents.Data
             if (newAbonent == null)
                 throw new ArgumentNullException(nameof(newAbonent));
 
-            var response = await _client.GetResponse<ListTransferDataAbonentDto>(new IdForCartDto { TemporaryId = temporaryId });
+            var response = await _client.GetResponse<ListTransferDataAbonentDto>(
+                new IdForCartDto { TemporaryId = temporaryId });
 
             var dataAbonents = response.Message.listData;
 
@@ -88,7 +86,7 @@ namespace ServiceAbonents.Data
             EF.Functions.Like(Convert.ToString(p.TariffId)!, $"%{filter.TariffId}%") &
             EF.Functions.Like(p.Patronymic, $"%{filter.Patronymic}%"));
 
-            return abonets.OrderBy(x => x.Id).ToList();
+            return abonets.OrderBy(x => x.Surname).ToList();
         }
 
         public void Update(Guid id, AbonentsUpdateDto updateAbonent)

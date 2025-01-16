@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using ServiceAbonents.Debiting;
 using ServiceAbonents.Dtos;
 using ServiceAbonents.Models;
@@ -14,10 +15,12 @@ namespace ServiceAbonents.Data
         private readonly ISender _send;
         private readonly IRemainRepo _remain;
         private readonly IDebiting _debiting;
+        private readonly IRequestClient<IdForTarifDto> _client;
 
         public SwitchTarif(AppDbContext context, IUpdateBalance updateBalance, ISender send,
-            IRemainRepo remain, IDebiting debiting)
+            IRemainRepo remain, IDebiting debiting, IRequestClient<IdForTarifDto> client)
         {
+            _client = client;
             _debiting = debiting;
             _context = context;
             _updateBalance = updateBalance;
@@ -35,14 +38,10 @@ namespace ServiceAbonents.Data
                 var costWithDiscount = tariffCost - GetDiscount(abonent.Id, tariffCost);
 
                 if (dynamicTarif.Minutes != null)
-                    tariffId = $"" +
-                        $"{dynamicTarif.Gigabytes}-" +
-                        $"{dynamicTarif.Minutes}-" +
-                        $"{dynamicTarif.Sms}-" +
-                        $"{dynamicTarif.UnlimVideo}-" +
-                        $"{dynamicTarif.UnlimSocials}-" +
-                        $"{dynamicTarif.UnlimMusic}-" +
-                        $"{dynamicTarif.LongDistanceCall}";
+                    tariffId = SetDynamicTariff(dynamicTarif, abonentId);
+
+                else
+                    UpdateRemain(staticTariff, abonentId);
 
                 abonent.TariffId = tariffId;
                 abonent.TariffCost = tariffCost;
@@ -61,6 +60,53 @@ namespace ServiceAbonents.Data
                         Balance = abonent.Balance
                     });
             }
+        }
+
+        private async void UpdateRemain(string staticTariff, Guid abonentId)
+        {
+            var response = await _client.GetResponse<TarrifDto>(new IdForTarifDto { TariffId = staticTariff });
+
+            var dataTariff = response.Message;
+
+            var updateRemain = new RemainUpdateDto
+            {
+                RemainGb = dataTariff.RemainGb,
+                RemainMin = dataTariff.RemainMin,
+                RemainSMS = dataTariff.RemainSMS,
+                UnlimMusic = dataTariff.UnlimMusic,
+                UnlimSocials = dataTariff.UnlimSocials,
+                UnlimVideo = dataTariff.UnlimVideo,
+                LongDistanceCall = dataTariff.LongDistanceCall
+            };
+
+            _remain.Update(abonentId, updateRemain);
+        }
+
+        private string SetDynamicTariff(SwitchTarifDto dynamicTarif, Guid abonentId)
+        {
+            var tariffId = $"" +
+                        $"{dynamicTarif.Gigabytes}-" +
+                        $"{dynamicTarif.Minutes}-" +
+                        $"{dynamicTarif.Sms}-" +
+                        $"{dynamicTarif.UnlimVideo}-" +
+                        $"{dynamicTarif.UnlimSocials}-" +
+                        $"{dynamicTarif.UnlimMusic}-" +
+                        $"{dynamicTarif.LongDistanceCall}";
+
+            var updateRemain = new RemainUpdateDto
+            {
+                RemainGb = dynamicTarif.Gigabytes,
+                RemainMin = dynamicTarif.Minutes,
+                RemainSMS = dynamicTarif.Sms,
+                UnlimMusic = dynamicTarif.UnlimMusic,
+                UnlimSocials = dynamicTarif.UnlimSocials,
+                UnlimVideo = dynamicTarif.UnlimVideo,
+                LongDistanceCall = dynamicTarif.LongDistanceCall
+            };
+
+            _remain.Update(abonentId, updateRemain);
+
+            return tariffId;
         }
 
         private decimal GetDiscount(Guid abonentId, decimal newTarifCost)

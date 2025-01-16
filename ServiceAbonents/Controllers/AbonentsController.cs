@@ -13,13 +13,11 @@ namespace ServiceAbonents.Controllers
     {
         private readonly int _pageSize = 20;
         private readonly IAbonentRepo _repository;
-        private readonly IRemainRepo _remainRepository;
         private readonly IMapper _mapper;
         private readonly ISwitchTarif _switch;
 
-        public AbonentsController(IAbonentRepo repository, IMapper mapper, IRemainRepo remainRepo, ISwitchTarif switchTarif)
+        public AbonentsController(IAbonentRepo repository, IMapper mapper, ISwitchTarif switchTarif)
         {
-            _remainRepository = remainRepo;
             _repository = repository;
             _mapper = mapper;
             _switch = switchTarif;
@@ -42,19 +40,14 @@ namespace ServiceAbonents.Controllers
                 return BadRequest("Invalid page number");
 
             var abonentItem = _repository.GetAllAbonents(filter);
-
-            //if (!abonentItem.Any())
-            //    return Ok();
-
             var startIndex = (page - 1) * _pageSize;
-
             var pagedItems = abonentItem.Skip(startIndex).Take(_pageSize).ToList();
-
             var map = _mapper.Map<IEnumerable<AbonentReadDto>>(pagedItems);
 
             if ((double)abonentItem.Count() / _pageSize <= 1)
                 return Ok(new GetAllAbonentsDto { abonentRead = map, PageCount = 1 });
-            return Ok(new GetAllAbonentsDto { abonentRead = map, 
+
+            return Ok(new GetAllAbonentsDto { abonentRead = map,
                 PageCount = Math.Ceiling((double)abonentItem.Count() / _pageSize) });
         }
 
