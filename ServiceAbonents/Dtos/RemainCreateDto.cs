@@ -6,9 +6,9 @@ namespace ServiceAbonents.Dtos
     {
         [Required]
         public Guid ClientId { get; set; }
-        public short RemainGb { get; set; } = 0;
-        public short RemainMin { get; set; } = 0;
-        public short RemainSMS { get; set; } = 0;
+        public decimal RemainGb { get; set; } = 0;
+        public decimal RemainMin { get; set; } = 0;
+        public decimal RemainSMS { get; set; } = 0;
         public bool UnlimVideo { get; set; } = false;
         public bool UnlimSocials { get; set; } = false;
         public bool UnlimMusic { get; set; } = false;

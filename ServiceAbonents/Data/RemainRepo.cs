@@ -48,13 +48,13 @@ namespace ServiceAbonents.Data
                 throw new NullReferenceException();
 
             if (updateRemain.RemainGb > 0)
-                remain.RemainGb = (short)updateRemain.RemainGb;
+                remain.RemainGb = (decimal)updateRemain.RemainGb;
 
             if (updateRemain.RemainMin > 0)
-                remain.RemainMin = (short)updateRemain.RemainMin;
+                remain.RemainMin = (decimal)updateRemain.RemainMin;
 
             if (updateRemain.RemainSMS > 0)
-                remain.RemainSMS = (short)updateRemain.RemainSMS;
+                remain.RemainSMS = (decimal)updateRemain.RemainSMS;
 
             if (updateRemain.UnlimVideo != null)
                 remain.UnlimVideo = (bool)updateRemain.UnlimVideo;
