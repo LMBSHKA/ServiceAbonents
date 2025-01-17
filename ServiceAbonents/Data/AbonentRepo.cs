@@ -23,7 +23,7 @@ namespace ServiceAbonents.Data
             _remain = remain;
         }
 
-        public async void CreateAbonent(AbonentCreateDto newAbonent, Guid temporaryId)
+        public async Task CreateAbonent(AbonentCreateDto newAbonent, Guid temporaryId)
         {
             if (newAbonent == null)
                 throw new ArgumentNullException(nameof(newAbonent));
@@ -37,7 +37,7 @@ namespace ServiceAbonents.Data
             {
                 var abonent = new Abonent
                 {
-                    Id = new Guid(),
+                    Id = Guid.NewGuid(),
                     Name = newAbonent.Name,
                     Surname = newAbonent.Surname,
                     Patronymic = newAbonent.Patronymic,
@@ -47,8 +47,8 @@ namespace ServiceAbonents.Data
                     TariffCost = dataAbonent.TariffCost,
                     TariffName = dataAbonent.dataTariff.TariffName
                 };
-                _context.Abonents.Add(abonent);
-                SaveChange();
+                await _context.Abonents.AddAsync(abonent);
+                
 
                 _debiting.AddNewAbonent(new DebitingAbonentDto
                 {
@@ -69,8 +69,9 @@ namespace ServiceAbonents.Data
                     LongDistanceCall = dataAbonent.dataTariff.LongDistanceCall
                 };
 
-                _remain.CreateRemain(remain);
+                await _context.Remains.AddAsync(remain); ;
             }
+            await _context.SaveChangesAsync();
         }
 
         public Abonent GetAbonentById(Guid id)

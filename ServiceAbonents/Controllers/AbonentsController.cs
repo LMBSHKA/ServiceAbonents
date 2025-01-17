@@ -81,9 +81,9 @@ namespace ServiceAbonents.Controllers
         /// <response code="400">Ошибка API(скоре всего неправильные данные)</response>
         /// <response code="500">Ошибка сервера</response>
         [HttpPost]
-        public ActionResult<AbonentCreateDto> CreateAbonent(AbonentCreateDto newAbonent, Guid temporaryId)
+        public async Task<IActionResult> CreateAbonent(AbonentCreateDto newAbonent, Guid temporaryId)
         {
-            _repository.CreateAbonent(newAbonent, temporaryId);
+            await _repository.CreateAbonent(newAbonent, temporaryId);
 
             return Ok();
         }

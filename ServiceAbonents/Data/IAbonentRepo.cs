@@ -10,7 +10,7 @@ namespace ServiceAbonents.Data
         bool SaveChange();
         IEnumerable<Abonent> GetAllAbonents(FilterDto filter);
         Abonent GetAbonentById(Guid id);
-        void CreateAbonent(AbonentCreateDto abonent, Guid TemporaryId);
+        Task CreateAbonent(AbonentCreateDto abonent, Guid TemporaryId);
         void Update(Guid id, AbonentsUpdateDto updateAbonent);
         TransferForAuthDto GetAbonentByPhoneNumber(string PhoneNumber);
     }
